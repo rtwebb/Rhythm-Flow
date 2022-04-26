@@ -13,7 +13,8 @@
     // Name = deltaT
 // global variable time - initialize to zero
     // Name = time
-// global width and height
+// global width and height - should come from image.js
+// maybe pixel 
 
 
 
@@ -28,7 +29,20 @@ Fluid.advection = function(){
 }
 
 // compute diffusion
-Fluid.diffusion = function(){
+Fluid.diffusion = function(coords, ){
+    // Grabbing coordinates
+    var x_left = new THREE.Vector2(Math.floor(coords.x - 1), Math.floor(coords.y));
+    var x_right = new THREE.Vector2(Math.floor(coords.x + 1), Math.floor(coords.y));
+    var x_top = new THREE.Vector2(Math.floor(coords.x), Math.floor(coords.y + 1));
+    var x_bottom = new THREE.Vector2(Math.floor(coords.x), Math.floor(coords.y - 1));
+
+    var q_velocity = q[coords.x][coords.y].velocity; 
+    var alpha = Math.pow(q_velocity, 2) / time; // velocity is a 2d vector this will not work
+    var b_lower = q_velocity; 
+    var rbeta = 1 / (4 + Math.pow(q_velocity, 2)/time); // velocity is a 2d vector this will not work
+    var result = (x_left + x_right + x_top + x_bottom + alpha * b_lower) * rbeta;
+
+
 
 }
 
@@ -48,7 +62,11 @@ Fluid.advanceProgram = function(){
     for (let x = 0; x < width; x++){
         for (let y = 0; y < height; y++){
             this.advection();
-            this.diffusion();
+            
+            for (let i = 0; i < 30; i++){
+                this.diffusion();
+            }
+            
             // set pixel color
             
             this.divergence();
@@ -63,6 +81,7 @@ Fluid.timeStep = function(){
     // Probably have to change deltaT so it does not conflict with time it takes to update 
     for (let i = deltaT; deltaT < 40; i++){
         requestAnimationFrame(timeStep);
+        time += deltaT;
     }
     advanceProgram();
 
