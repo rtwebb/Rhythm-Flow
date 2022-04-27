@@ -125,13 +125,13 @@ Fluid.advection = function(coords, deltaT){
 
 }
 
-// compute diffusion
-Fluid.diffusion = function(coords, ){
+// return updated color to set into copy of q
+Fluid.diffusionMath = function(coords){
     // Grabbing coordinates
-    var x_left = q[Math.floor(coords.x - 1)][Math.floor(coords.y)].velocity.clone(); // should these be velocities or positions
-    var x_right = q[Math.floor(coords.x + 1)][Math.floor(coords.y)].clone();
-    var x_top = q[Math.floor(coords.x)][Math.floor(coords.y + 1)].clone();
-    var x_bottom = q[Math.floor(coords.x)][Math.floor(coords.y - 1)].clone();
+    var x_left = q[Math.floor(coords.x - 1)][Math.floor(coords.y)].velocity.clone();
+    var x_right = q[Math.floor(coords.x + 1)][Math.floor(coords.y)].velocity.clone();
+    var x_top = q[Math.floor(coords.x)][Math.floor(coords.y + 1)].velocity.clone();
+    var x_bottom = q[Math.floor(coords.x)][Math.floor(coords.y - 1)].velocity.clone();
 
     var q_squared = q_velocity.clone().multiply(q_velocity);
 
@@ -142,6 +142,25 @@ Fluid.diffusion = function(coords, ){
     var rbeta = new THREE.Vector2(1/val.x, 1/val.y); // not sure if I am taking the reciprocal right
     var result = (x_left.add(x_right).add(x_top).add(x_bottom).add(alpha_b_lower));
     return result.multiply(rbeta);
+
+}
+
+// compute diffusion
+Fluid.diffusion = function(colorImg, ){
+    // take copy of image 
+
+    // call diffusionMath on each pixel and set results in copy of q
+    for (let x = 0; x < width; x++){
+        for (let y = 0; y < height; y++){
+            let coords = new THREE.Vector2(x, y);
+            let new_color = this.diffusionMath(coords);
+            cpyImg.setPixel(x, y, new_color);
+        }
+    }
+
+    // set old Image to newImg
+    colorImg = cpyImg;
+    
 
 }
 
@@ -203,7 +222,7 @@ Fluid.advanceProgram = function(){
         // do not overwrite old values 
         // after calling for every pixel update the whole image 
 
-
+    // var Img = image
     // do whole field not just x and y 
     for (let x = 0; x < width; x++){
         for (let y = 0; y < height; y++){
@@ -212,7 +231,7 @@ Fluid.advanceProgram = function(){
             
             for (let i = 0; i < 30; i++){
                 // send a copy of q 
-                this.diffusion();
+                this.diffusion(); // send image of colors and then grab the new image and set image to that and then send that into diffusion
             }
             
             // set pixel color
