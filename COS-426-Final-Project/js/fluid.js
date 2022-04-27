@@ -27,6 +27,7 @@ function Fluid(image) {
             row_of_vecs.push(new THREE.Vector2());
             row_of_q_vals.push({"color": new THREE.Vector4(), "velocity": THREE.Vector2()});
         }
+        // store velocity in image 'r' = 'x velocity' //store velocity as image to help update the colors which are ultimately shown 
         this.vecField.push(row_of_vecs);
         this.q.push(row_of_q_vals);
     }
@@ -197,12 +198,20 @@ Fluid.advanceProgram = function(){
     // on all vectors, etc.) rather than one vector at a time (i.e. advection, 
     // diffusion, forces, projection on this vector, then the next vector, etc.). 
 
+    // one equation to do update question 
+        // that gets called across the image 
+        // do not overwrite old values 
+        // after calling for every pixel update the whole image 
+
+
+    // do whole field not just x and y 
     for (let x = 0; x < width; x++){
         for (let y = 0; y < height; y++){
             coords = new THREE.Vector2(x, y); 
             this.advection();
             
             for (let i = 0; i < 30; i++){
+                // send a copy of q 
                 this.diffusion();
             }
             
