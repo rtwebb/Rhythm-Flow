@@ -44,8 +44,83 @@ function Fluid(image) {
 // Physics equations
 //////////////////////////////////////////////////////////
 
+//start = starting coordinates
+Fluid.interpolate = function(X){
+    var coord1 = X.clone();
+    var coord2 = new THREE.Vector2(0,0);
+    var coord3 = new THREE.Vector2(0,0);
+    var coord4 = new THREE.Vector2(0,0);
+
+    //confine within grid
+    coord1.round()
+    coord1.x = Math.min(coord1.x, width - 1);
+    coord1.x = Math.max(coord1.x, 0.0);
+    coord1.y = Math.min(coord1.y, height - 1);
+    coord1.y = Math.max(coord1.y, 0.0);
+
+    //Define offsets
+    var offset1;
+    var offset2;
+    var offset3;
+
+    //top right corner
+    if(start.x == width - 1 && start.y == 0){
+        offset1 = new THREE.Vector2(-1, 0);
+        offset2 = new THREE.Vector2(0, -1);
+        offset3 = new THREE.Vector2(-1, -1);
+    }
+    //rightmost column
+    else if(start.x == width - 1){
+        offset1 = new THREE.Vector2(-1, 0);
+        offset2 = new THREE.Vector2(0, 1);
+        offset3 = new THREE.Vector2(-1, 1);
+    //top row
+    }else if(start.y == 0){
+        offset1 = new THREE.Vector2(1, 0);
+        offset2 = new THREE.Vector2(0, -1);
+        offset3 = new THREE.Vector2(1, -1);
+    //always left and down , wonder how this might change if went right and up
+    }else{
+        offset1 = new THREE.Vector2(1, 0);
+        offset2 = new THREE.Vector2(0, 1);
+        offset3 = new THREE.Vector2(1, 1)
+    }
+
+    //compute 3 nearest coords
+    coord2.addVectors(start, offset1);
+    coord3.addVectors(start, offset2);
+    coord4.addVectors(start, offset3);
+
+    var x1 = coord1.x;
+    var y1 = coord1.y;
+    var x2 = coor4.x;
+    var y2 = coord4.y;
+
+    //velocity?
+    //Bilinear interpolation
+    xValue = ( field[coord1.x][coord1.y].clone().multiplyScalar( (x2 - X.x) * (y2 - X.y) ).add(
+                field[coord2.x][coord2.y].clone().multiplyScalar( (X.x - x1) * (y2 - X.y) ) ).add(
+                field[coord3.x][coord3.y].clone().multiplyScalar( (x2 - X.x) * (X.y - y1) ) ).add(
+                field[coord4.x][coord4.y].clone().multiplyScalar( (X.x - x1) * ( X.y - y1)) )).multipleScalar( 1 / ((x2 - x1) * (y2 - y1)) );
+
+    return xValue;
+
+
+}
+
+//1D or 2D field and q?
 // compute advection
-Fluid.advection = function(){
+Fluid.advection = function(coords, deltaT){
+    //negate current velocity,
+    //interpolate
+    var uVelocity = vecField[coords.x][coords.y];
+    var negated = uVelocity.negate();
+    var prev = negated.multiplyScalar(deltaT);
+
+    var X = this.interpolate(prev);
+
+    //updateing q or velocity?
+    q[coords.x][coords.y] = q[X.x][X.y];
 
 }
 
