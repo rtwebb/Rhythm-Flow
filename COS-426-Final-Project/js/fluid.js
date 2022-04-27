@@ -127,10 +127,10 @@ Fluid.advection = function(coords, deltaT){
 // compute diffusion
 Fluid.diffusion = function(coords, ){
     // Grabbing coordinates
-    var x_left = new THREE.Vector2(Math.floor(coords.x - 1), Math.floor(coords.y)); // should these be velocities or positions
-    var x_right = new THREE.Vector2(Math.floor(coords.x + 1), Math.floor(coords.y));
-    var x_top = new THREE.Vector2(Math.floor(coords.x), Math.floor(coords.y + 1));
-    var x_bottom = new THREE.Vector2(Math.floor(coords.x), Math.floor(coords.y - 1));
+    var x_left = q[Math.floor(coords.x - 1)][Math.floor(coords.y)].velocity.clone(); // should these be velocities or positions
+    var x_right = q[Math.floor(coords.x + 1)][Math.floor(coords.y)].clone();
+    var x_top = q[Math.floor(coords.x)][Math.floor(coords.y + 1)].clone();
+    var x_bottom = q[Math.floor(coords.x)][Math.floor(coords.y - 1)].clone();
 
     var q_squared = q_velocity.clone().multiply(q_velocity);
 
