@@ -119,14 +119,14 @@ Fluid.advection = function(coords, deltaT){
 // return updated color to set into copy of q
 Fluid.diffusionMath = function(coords){
     // Grabbing coordinates
-    var x_left = q[Math.floor(coords.x - 1)][Math.floor(coords.y)].velocity.clone();
-    var x_right = q[Math.floor(coords.x + 1)][Math.floor(coords.y)].velocity.clone();
-    var x_top = q[Math.floor(coords.x)][Math.floor(coords.y + 1)].velocity.clone();
-    var x_bottom = q[Math.floor(coords.x)][Math.floor(coords.y - 1)].velocity.clone();
+    var x_left = this.vecField.getVector(Math.floor(coords.x - 1), Math.floor(coords.y)).clone();
+    var x_right = this.vecField.getVector(Math.floor(coords.x + 1), Math.floor(coords.y)).clone(); 
+    var x_top = this.vecField.getVector(Math.floor(coords.x), Math.floor(coords.y + 1)).clone();
+    var x_bottom = this.vecField.getVector(Math.floor(coords.x), Math.floor(coords.y - 1)).clone();
+    
 
+    var q_velocity = this.vecField.getVector(Math.floor(coords.x), Math.floor(coords.y)).clone(); 
     var q_squared = q_velocity.clone().multiply(q_velocity);
-
-    var q_velocity = q[coords.x][coords.y].velocity.clone(); 
     var alpha = q_squared.clone().divideScalar(time); // velocity^2 / time
     var alpha_b_lower = q_velocity.clone().multiply(alpha);  //alpha * b
     var val = q_squared.clone().divideScalar(time).addScalar(4); 
@@ -139,6 +139,7 @@ Fluid.diffusionMath = function(coords){
 // compute diffusion
 Fluid.diffusion = function(colorImg, ){
     // take copy of image 
+    var cpyImg = this.vecField.copyImg();
 
     // call diffusionMath on each pixel and set results in copy of q
     for (let x = 0; x < width; x++){
@@ -150,7 +151,7 @@ Fluid.diffusion = function(colorImg, ){
     }
 
     // set old Image to newImg
-    colorImg = cpyImg;
+    //colorImg = cpyImg;
 }
 
 // compute divergence 
