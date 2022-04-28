@@ -92,27 +92,40 @@ Fluid.interpolate = function(X){
 
     //velocity?
     //Bilinear interpolation
-    xValue = ( field[coord1.x][coord1.y].clone().multiplyScalar( (x2 - X.x) * (y2 - X.y) ).add(
-                field[coord2.x][coord2.y].clone().multiplyScalar( (X.x - x1) * (y2 - X.y) ) ).add(
-                field[coord3.x][coord3.y].clone().multiplyScalar( (x2 - X.x) * (X.y - y1) ) ).add(
-                field[coord4.x][coord4.y].clone().multiplyScalar( (X.x - x1) * ( X.y - y1)) )).multipleScalar( 1 / ((x2 - x1) * (y2 - y1)) );
+    xValue = ( this.fieldVec.getVector(coord1.x, coord1.y).clone().multiplyScalar( (x2 - X.x) * (y2 - X.y) ).add(
+                this.fieldVec.getVector(coord2.x, coord2.y).clone().multiplyScalar( (X.x - x1) * (y2 - X.y) ) ).add(
+                this.fieldVec.getVector(coord3.x, coord3.y).clone().multiplyScalar( (x2 - X.x) * (X.y - y1) ) ).add(
+                this.fieldVec.getVector(coord4.x, coord4.y).clone().multiplyScalar( (X.x - x1) * ( X.y - y1)) )).multipleScalar( 1 / ((x2 - x1) * (y2 - y1)) );
 
     return xValue;
 }
 
 //1D or 2D field and q?
 // compute advection
-Fluid.advection = function(coords, deltaT){
+Fluid.advection = function(deltaT){
     //negate current velocity,
     //interpolate
-    var uVelocity = this.vecField.getVector(coords.x, coords.y);
-    var negated = uVelocity.negate();
-    var prev = negated.multiplyScalar(deltaT);
+    
+    var cpyImg = this.vecField.copyImg;
 
-    var X = this.interpolate(prev);
+    for(let x = 0; x < width; x++){
+        for (let y = 0; y < height; y++){
+            let coords = new THREE.Vector2(x, y);
 
-    //updateing q or velocity?
-    q[coords.x][coords.y] = q[X.x][X.y];
+            var uVelocity = this.vecField.getVector(coords.x, coords.y);
+            var negated = uVelocity.negate();
+            var prev = negated.multiplyScalar(deltaT);
+        
+            // interpolation
+            var X = this.interpolate(prev);
+        
+            // Set image
+            cpyImg.setVector(x, y, X);
+        }
+    }
+
+    this.vecField = cpyImg;
+ 
 
 }
 
@@ -129,15 +142,18 @@ Fluid.diffusionMath = function(coords){
     var q_squared = q_velocity.clone().multiply(q_velocity);
     var alpha = q_squared.clone().divideScalar(time); // velocity^2 / time
     var alpha_b_lower = q_velocity.clone().multiply(alpha);  //alpha * b
+
+    // 1 / (4 + x^2/t)
     var val = q_squared.clone().divideScalar(time).addScalar(4); 
-    var rbeta = new THREE.Vector2(1/val.x, 1/val.y); // not sure if I am taking the reciprocal right
+    var rbeta = new THREE.Vector2(1/val.x, 1/val.y); 
+   
     var result = (x_left.add(x_right).add(x_top).add(x_bottom).add(alpha_b_lower));
     return result.multiply(rbeta);
 
 }
 
 // compute diffusion
-Fluid.diffusion = function(colorImg, ){
+Fluid.diffusion = function(){
     // take copy of image 
     var cpyImg = this.vecField.copyImg();
 
@@ -146,11 +162,12 @@ Fluid.diffusion = function(colorImg, ){
         for (let y = 0; y < height; y++){
             let coords = new THREE.Vector2(x, y);
             let new_color = this.diffusionMath(coords);
-            cpyImg.setPixel(x, y, new_color);
+            cpyImg.setVector(x, y, new_color);
         }
     }
 
     // set old Image to newImg
+    this.vecField = cpyImg;
     //colorImg = cpyImg;
 }
 
@@ -195,23 +212,17 @@ Fluid.advanceProgram = function(){
         // after calling for every pixel update the whole image 
 
 
-    // do whole field not just x and y 
-    for (let x = 0; x < width; x++){
-        for (let y = 0; y < height; y++){
-            coords = new THREE.Vector2(x, y); 
-            this.advection();
-            
-            for (let i = 0; i < 30; i++){
-                // send a copy of q 
-                this.diffusion();
-            }
-            
-            // set pixel color
-            
-            this.divergence(coords);
-            // update velocity at given position 
-        }
-    }       
+    this.advection();
+    
+    for (let i = 0; i < 30; i++){
+        this.diffusion();
+    }
+    
+    // set pixel color
+    
+    //this.divergence();
+    // update velocity at given position 
+   
         
 }
 
