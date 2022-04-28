@@ -10,7 +10,7 @@ Sim.init = function() {
 }
 
 Sim.simulate = function() {
-    fluid.advanceProgramTest();
+    fluid.advanceProgram();
     Sim.update();
 }
 
