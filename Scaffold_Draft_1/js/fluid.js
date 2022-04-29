@@ -13,23 +13,31 @@ var time = 0
 var width = Scene.canvas.width;
 var height = Scene.canvas.height;
 
-function Fluid(image, pressureField) {
+function Fluid(vecField, colorField, pressureField) {
     // Initialize 2D velocity array (vecField) - that stores 2D vector w/ x and y velocity 
     // Initialize q - velocity and color (2d array of dictionaries)) 
     // Name = q -> each new [] represents a new row and the commas represent consecutive column
     // let q = Array( [{'color': 4d vector, 'velocity': 2d vector}, {'color': 4d vector, 'velocity': 2d vector}] 
                     // [{'color': 4d vector, 'velocity': 2d vector}, {'color': 4d vector, 'velocity': 2d vector}])
-    this.vecField = image.copyImg();
+    this.vecField = vecField.copyImg();
+    this.colorField = colorField.copyImg();
     this.q = [];
-    for (let y = 0; y < image.height; y++) {
+    for (let y = 0; y < colorField.height; y++) {
         row_of_q_vals = []
-        for (let x = 0; x < image.width; x++) {
-            this.vecField.setVector(x, y, new THREE.Vector2(1,0));
+        for (let x = 0; x < colorField.width; x++) {
+            this.vecField.setVector(x, y, new THREE.Vector2(1,0)); // To the right
+            if (x < width / 2) {
+                this.colorField.setVector(x, y, new THREE.Vector3(0, 0, 1)); // Blue
+            } else {
+                this.colorField.setVector(x, y, new THREE.Vector3(0, 1, 0)); // Green
+            }
+            
             row_of_q_vals.push({"color": new THREE.Vector4(), "velocity": THREE.Vector2(), "pressure": 0});
         }
         // store velocity in image 'r' = 'x velocity' //store velocity as image to help update the colors which are ultimately shown 
         this.q.push(row_of_q_vals);
     }
+    
     this.pressureField = pressureField.copyImg();
 }
 
@@ -287,9 +295,9 @@ Fluid.prototype.advanceProgram = function(){
 
     // debugger;
     
-    for (let i = 0; i < 30; i++){
-        this.diffusion();
-    }
+    // for (let i = 0; i < 30; i++){
+    //     this.diffusion();
+    // }
 
     // debugger;
 

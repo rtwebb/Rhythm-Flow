@@ -17,7 +17,7 @@ Renderer.displayImage = function(image, offsetX, offsetY, noClear) {
 
 Renderer.init = function() {
     Sim.init();
-    Renderer.displayImage(Scene.image, undefined, undefined, true);
+    Renderer.displayImage(Scene.colorField, undefined, undefined, true);
 }
 
 Renderer.clearDisplay = function() {
@@ -33,7 +33,7 @@ Renderer.animate = function() {
     time += SceneParams.deltaT; // equivalent to ~33 fps
 
     Sim.simulate();
-    Renderer.displayImage(Scene.image, undefined, undefined, true);
+    Renderer.displayImage(Scene.colorField, undefined, undefined, true);
 }
 
 // when HTML is finished loading, do this

@@ -5,7 +5,7 @@ var fluid;
 
 Sim.init = function() {
     // The fluid being simulated.
-    fluid = new Fluid(Scene.image, Scene.pressureField);
+    fluid = new Fluid(Scene.vecField, Scene.colorField, Scene.pressureField);
     Sim.update();
 }
 
@@ -15,6 +15,7 @@ Sim.simulate = function() {
 }
 
 Sim.update = function() {
-    Scene.image = fluid.vecField.copyImg();
-    Scene.pressureField = fluid.pressureField.copyImg();
+    Scene.vecField = fluid.vecField.copyImg();
+    Scene.colorField = fluid.colorField.copyImg();
+    // Scene.pressureField = fluid.pressureField.copyImg();
 }

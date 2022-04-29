@@ -6,10 +6,14 @@
 // IMAGE
 //////////////////////////////////////////////////////////
 
-function Image(width, height, data) {
+function Image(width, height, data, isVelocity) {
   this.width = width;
   this.height = height;
   this.data = data || this.createData(width, height);
+  
+  // if velocity field, vecs need 2 dimension
+  // otherwise, vectors will be 4 dimensional
+  this.isVelocity = isVelocity; 
 }
 
 Image.prototype.fill = function(vector) {
@@ -26,9 +30,9 @@ Image.prototype.createData = function(width, height) {
 
 Image.prototype.createImg = function(width, height) {
   var data = this.createData(width, height);
-  // initial value of image is white and fully opaque
+  // initial value of image is zero vectors
   for (var i = 0; i < data.length; i++) {
-    data[i] = 255;
+    data[i] = 0;
   }
   return new Image(width, height, data);
 };
@@ -66,25 +70,43 @@ Image.prototype.vectorIndex = function(x, y) {
 
 Image.prototype.getVector = function(x, y) {
   if (y < 0 || y >= this.height || x < 0 || x >= this.width) {
-    return new THREE.Vector2(0, 0);
+    if (this.isVelocity) return new THREE.Vector2(0, 0);
+    return new THREE.Vector3(0, 0, 0);
   }
 
   var index = this.vectorIndex(x, y);
-  var vector = new THREE.Vector2(
-    this.data[index] / 255,
-    this.data[index + 1] / 255
-  );
-  return vector;
+
+  var vector; 
+  if (this.isVelocity) { // this is velocity field
+    vector = new THREE.Vector2(
+      this.data[index],
+      this.data[index + 1]
+    );
+  } else { // this is color field
+    vector = new THREE.Vector3(
+      this.data[index] / 255, // red
+      this.data[index + 1] / 255, // green
+      this.data[index + 2] / 255 // blue
+    );
+  }
+  return vector.clone();
 };
 
-// NOTE: pixel must be in rgb colorspace
+// NOTE: color vectors must be in rgb colorspace
 // TODO: assert here?
 Image.prototype.setVector = function(x, y, vector) {
   if (y >= 0 && x >= 0 && y < this.height && x < this.width) {
     var index = this.vectorIndex(x, y);
-    this.data[index] = vector.x * 255;
-    this.data[index + 1] = vector.y * 255;
-    this.data[index + 2] = 0 * 255; // set blue comp to 0
-    this.data[index + 3] = 1 * 255; // set alpha to 1
+    if (this.isVelocity) {
+      this.data[index] = vector.x;
+      this.data[index + 1] = vector.y;
+      this.data[index + 2] = 0; // irrelevant for velocity field, set to 0 
+      this.data[index + 3] = 255; // irrelevant for velocity field, set to 255 (alpha = 1)
+    } else {
+      this.data[index] = vector.x * 255; // red 
+      this.data[index + 1] = vector.y * 255; // green
+      this.data[index + 2] = vector.z * 255; // blue
+      this.data[index + 3] = 255; // alpha 
+    }
   }
 };
