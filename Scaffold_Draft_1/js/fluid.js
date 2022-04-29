@@ -23,6 +23,8 @@ function Fluid(vecField, colorField, pressureField) {
         row_of_q_vals = []
         for (let x = 0; x < colorField.width; x++) {
             this.vecField.setVector(x, y, new THREE.Vector2(1,0)); // To the right
+            // this.vecField.setVector(x, y, new THREE.Vector2(x,y));
+            // this.vecField.setVector(x, y, new THREE.Vector2(Math.sin(2 * Math.PI * y), Math.sin(2 * Math.PI * x)));
             if (x < width / 2) {
                 this.colorField.setVector(x, y, new THREE.Vector3(0, 0, 1)); // Blue
             } else {
@@ -45,11 +47,8 @@ function Fluid(vecField, colorField, pressureField) {
 //////////////////////////////////////////////////////////
 
 //start = starting coordinates
-Fluid.prototype.interpolate = function(X){
-    var coord1 = X.clone();
-    // var coord2 = new THREE.Vector2(0,0);
-    // var coord3 = new THREE.Vector2(0,0);
-    // var coord4 = new THREE.Vector2(0,0);
+Fluid.prototype.interpolate = function(position, vecFlag){
+    var coord1 = position.clone();
 
     //confine within grid
     // coord1.round()
@@ -64,58 +63,25 @@ Fluid.prototype.interpolate = function(X){
     let y2 = Math.floor(coord1.y) + 1;
     let y1 = Math.floor(coord1.y);
 
-    //Define offsets
-    var offset1;
-    var offset2;
-    var offset3;
-
-    // //top right corner
-    // if(coord1.x == width - 1 && coord1.y == 0){
-    //     offset1 = new THREE.Vector2(-1, 0);
-    //     offset2 = new THREE.Vector2(0, -1);
-    //     offset3 = new THREE.Vector2(-1, -1);
-    // }
-    // //rightmost column
-    // else if(coord1.x == width - 1){
-    //     offset1 = new THREE.Vector2(-1, 0);
-    //     offset2 = new THREE.Vector2(0, 1);
-    //     offset3 = new THREE.Vector2(-1, 1);
-    // //top row
-    // }else if(coord1.y == 0){
-    //     offset1 = new THREE.Vector2(1, 0);
-    //     offset2 = new THREE.Vector2(0, -1);
-    //     offset3 = new THREE.Vector2(1, -1);
-    // //always left and down , wonder how this might change if went right and up
-    // }else{
-    //     offset1 = new THREE.Vector2(1, 0);
-    //     offset2 = new THREE.Vector2(0, 1);
-    //     offset3 = new THREE.Vector2(1, 1)
-    // }
-
     // linear interpolation
     let val = 1 / ((x2 - x1) * (y2 - y1));
-           
-    let Q11 = this.vecField.getVector(x1, y1).clone();     
-    let Q12 = this.vecField.getVector(x1, y2).clone();
-    let Q21 = this.vecField.getVector(x2, y1).clone();
-    let Q22 = this.vecField.getVector(x2, y2).clone();
+    let Q11;
+    let Q12;
+    let Q21;
+    let Q22;
 
-    //compute 3 nearest coords
-    // coord2.addVectors(coord1, offset1);
-    // coord3.addVectors(coord1, offset2);
-    // coord4.addVectors(coord1, offset3);
+    if( vecFlag === true){
+        Q11 = this.vecField.getVector(x1, y1).clone();     
+        Q12 = this.vecField.getVector(x1, y2).clone();
+        Q21 = this.vecField.getVector(x2, y1).clone();
+        Q22 = this.vecField.getVector(x2, y2).clone();
+    }else{
+        Q11 = this.colorField.getVector(x1, y1).clone();     
+        Q12 = this.colorField.getVector(x1, y2).clone();
+        Q21 = this.colorField.getVector(x2, y1).clone();
+        Q22 = this.colorField.getVector(x2, y2).clone();
 
-    // var x1 = coord1.x;
-    // var y1 = coord1.y;
-    // var x2 = coord4.x;
-    // var y2 = coord4.y;
-
-    //velocity?
-    //Bilinear interpolation
-    // var xValue = ( this.vecField.getVector(coord1.x, coord1.y).clone().multiplyScalar( (x2 - X.x) * (y2 - X.y) ).add(
-    //             this.vecField.getVector(coord2.x, coord2.y).clone().multiplyScalar( (X.x - x1) * (y2 - X.y) ) ).add(
-    //             this.vecField.getVector(coord3.x, coord3.y).clone().multiplyScalar( (x2 - X.x) * (X.y - y1) ) ).add(
-    //             this.vecField.getVector(coord4.x, coord4.y).clone().multiplyScalar( (X.x - x1) * ( X.y - y1)) )).multiplyScalar( 1 / ((x2 - x1) * (y2 - y1)) );
+    }
 
     var xValue = ( Q11.multiplyScalar( (x2 - coord1.x) * (y2 - coord1.y) ).add(
         Q21.multiplyScalar( (coord1.x - x1) * (y2 - coord1.y) ) ).add(
@@ -127,30 +93,36 @@ Fluid.prototype.interpolate = function(X){
 
 //1D or 2D field and q?
 // compute advection
-Fluid.prototype.advection = function(deltaT){
+Fluid.prototype.advector = function(vecFlag){
     //negate current velocity,
     //interpolate
-    
-    var cpyImg = this.vecField.copyImg();
+    var cpyImg = undefined;
+    if(vecFlag === true){
+        cpyImg = this.vecField.copyImg();
+    }else{
+        cpyImg = this.colorField.copyImg();
+    }
+
 
     for(let x = 0; x < width; x++){
         for (let y = 0; y < height; y++){
             let coords = new THREE.Vector2(x, y);
-
-            var uVelocity = this.vecField.getVector(coords.x, coords.y);
-            var prev = coords.clone().sub(uVelocity.clone().multiplyScalar(deltaT));
+            
+            var uVelocity = this.vecField.getVector(coords.x, coords.y).clone();
+            var prev = coords.clone().sub(uVelocity.multiplyScalar(deltaT));
         
             // interpolation
-            var X = this.interpolate(coords, prev);
+            var X = this.interpolate(prev, vecFlag);
         
             // Set image
             cpyImg.setVector(x, y, X);
         }
     }
-
-    this.vecField = cpyImg;
- 
-
+    if(vecFlag == true){
+        this.vecField = cpyImg;
+    }else{
+        this.colorField = cpyImg;
+    }
 }
 
 Fluid.prototype.diffusionPressure = function(coords){
@@ -288,7 +260,8 @@ Fluid.prototype.advanceProgram = function(){
 
     // debugger;
 
-    this.advection();
+    //true meaning vector advection
+    this.advector(true);
 
     // debugger;
     
@@ -304,6 +277,10 @@ Fluid.prototype.advanceProgram = function(){
     
     //this.computePressure();
     // update velocity at given position 
+
+    //false meaning color advection not vector advection
+    this.advector(false);
+
    
         
 }
