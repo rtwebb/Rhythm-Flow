@@ -13,7 +13,7 @@ var time = 0
 var width = Scene.canvas.width;
 var height = Scene.canvas.height;
 
-function Fluid(image) {
+function Fluid(image, pressureField) {
     // Initialize 2D velocity array (vecField) - that stores 2D vector w/ x and y velocity 
     // Initialize q - velocity and color (2d array of dictionaries)) 
     // Name = q -> each new [] represents a new row and the commas represent consecutive column
@@ -30,6 +30,7 @@ function Fluid(image) {
         // store velocity in image 'r' = 'x velocity' //store velocity as image to help update the colors which are ultimately shown 
         this.q.push(row_of_q_vals);
     }
+    this.pressureField = pressureField.copyImg();
 }
 
 
@@ -193,7 +194,7 @@ Fluid.prototype.diffusion = function(){
 // 2 assumptions: 
 // Zero Padding (off grid means 0 flow) 
 // Gridsize = 1 (not exactly sure, but think this is more for GPUs)
-Fluid.prototype.divergence = function(coords){
+Fluid.prototype.divergenceMath = function(coords){
     uTop = this.vecField.getVector(coords.x, coords.y + 1);
     uBot = this.vecField.getVector(coords.x, coords.y - 1);
     uLeft = this.vecField.getVector(coords.x - 1, coords.y);
@@ -203,6 +204,37 @@ Fluid.prototype.divergence = function(coords){
     yComponent = new THREE.Vector2().copy(uTop).sub(uBot);
 
     return new THREE.Vector2().copy(xComponent).add(yComponent).divideScalar(2);
+}
+
+Fluid.prototype.computePressure = function() {
+    // take copy of image 
+    var divergenceField = this.vecField.copyImg();
+
+    // call divergenceMath on each vector and set results in copy of vecField
+    for (let x = 0; x < width; x++){
+        for (let y = 0; y < height; y++){
+            let coords = new THREE.Vector2(x, y);
+            let new_color = this.divergenceMath(coords);
+            divergenceField.setVector(x, y, new_color);
+        }
+    }
+
+    // Call Jacobi with x being pressure field and b being divergenceField
+    for (let i = 0; i < 20; i++) {
+        let cpyImg = this.pressureField.copyImg();
+        for (let x = 0; x < width; x++){
+            for (let y = 0; y < height; y++){
+                let coords = new THREE.Vector2(x, y);
+                // set alpha = -x^2
+                let alpha = -Math.pow(this.pressureField.getPressure(x, y), 2);
+                // set Beta = 4 so rBeta = 1/4
+                let rBeta = 1/4;
+                // let new_pressure = this.jacobi(coords, alpha, rBeta, this.pressureField, divergenceField);
+                cpyImg.setPressure(x, y, new_pressure);
+            }
+        }
+        this.pressureField = cpyImg;
+    } 
 }
 
 // Version of Jacobi (A.K.A. Diffusion) which takes 
@@ -245,7 +277,7 @@ Fluid.prototype.advanceProgram = function(){
     
     // set pixel color
     
-    //this.divergence();
+    //this.computePressure();
     // update velocity at given position 
    
         

@@ -6,3 +6,4 @@ Scene.canvas = document.getElementById("canvas");
 Scene.ctx = canvas.getContext("2d"); 
 
 Scene.image = new Image(Scene.canvas.width, Scene.canvas.height, undefined);
+Scene.pressureField = new Pressurefield(Scene.canvas.width, Scene.canvas.height, undefined);
