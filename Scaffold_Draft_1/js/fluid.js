@@ -25,7 +25,7 @@ function Fluid(image, pressureField) {
         row_of_q_vals = []
         for (let x = 0; x < image.width; x++) {
             this.vecField.setVector(x, y, new THREE.Vector2(1,0));
-            row_of_q_vals.push({"color": new THREE.Vector4(), "velocity": THREE.Vector2()});
+            row_of_q_vals.push({"color": new THREE.Vector4(), "velocity": THREE.Vector2(), "pressure": 0});
         }
         // store velocity in image 'r' = 'x velocity' //store velocity as image to help update the colors which are ultimately shown 
         this.q.push(row_of_q_vals);
@@ -148,6 +148,20 @@ Fluid.prototype.advection = function(deltaT){
 
 }
 
+Fluid.prototype.diffusionPressure = function(coords){
+    var x_left = q[Math.floor(coords.x - 1)][Math.floor(coords.y)].pressure;
+    var x_right = q[Math.floor(coords.x + 1)][Math.floor(coords.y)].pressure;
+    var x_top = q[Math.floor(coords.x)][Math.floor(coords.y + 1)].pressure;
+    var x_bottom = q[Math.floor(coords.x)][Math.floor(coords.y - 1)].pressure;
+
+    var pressure = q[Math.floor(coords.x)][Math.floor(coords.y)].pressure;
+    var alpha = -Math.pow(pressure, 2.0);
+    var rBeta = 1/4;
+    return (x_left + x_right + x_top + x_bottom + (alpha * pressure)) * rBeta; 
+
+}
+
+
 // return updated color to set into copy of q
 Fluid.prototype.diffusionMath = function(coords){
     // Grabbing coordinates
@@ -172,7 +186,7 @@ Fluid.prototype.diffusionMath = function(coords){
 }
 
 // compute diffusion
-Fluid.prototype.diffusion = function(){
+Fluid.prototype.diffusion = function(flag){
     // take copy of image 
     var cpyImg = this.vecField.copyImg();
 
@@ -180,8 +194,14 @@ Fluid.prototype.diffusion = function(){
     for (let x = 0; x < width; x++){
         for (let y = 0; y < height; y++){
             let coords = new THREE.Vector2(x, y);
-            let new_color = this.diffusionMath(coords);
-            cpyImg.setVector(x, y, new_color);
+            if (flag !== true){
+                let new_color = this.diffusionMath(coords);
+                cpyImg.setVector(x, y, new_color);
+            }
+            else{
+                let new_pressure = this.diffusionPressure(coords);
+            }
+
         }
     }
 
