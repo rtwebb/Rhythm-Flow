@@ -26,10 +26,9 @@ function Fluid(vecField, colorField, pressureField) {
         for (let y = 0; y < colorField.height; y++) {
             this.vecField.setVector(x, y, new THREE.Vector2(Math.sin(2 * Math.PI * y), Math.sin(2 * Math.PI * x))); 
             this.colorField.setVector(x, y, new THREE.Vector3(0, 0, 1)); // Blue
-            this.pressureField.setVector(x, y, 0);
+            this.pressureField.setPressure(x, y, 0);
         }
     }
-    
 
 }
 
@@ -134,7 +133,7 @@ Fluid.prototype.divergence = function(){
                 let val = divergence.addScalar(pRight).addScalar(pLeft).addScalar(pTop).addScalar(pBottom);
                 let pressure = val.divideScalar(4);
 
-                cpyImg.setVector(x, y, pressure);
+                cpyImg.setPressure(x, y, pressure);
             }
         }
         this.pressureField = cpyImg;
@@ -150,34 +149,28 @@ Fluid.prototype.subtract = function(){
             let u = this.vecField.getVector(x, y);
             let u_x = u.x - (deltaT/2) * (cpyPressure.getPressure((x + 1), y) - cpyPressure.getPressure((x -1), y)); 
             let u_y = u.y - (deltaT/2) * (cpyPressure.getPressure(x, (y+1)) - cpyPressure.getPressure(x, (y-1)));
-            cpyImg.setVector(x, y, val)
-
+            // cpyImg.setVector(x, y, val); Not sure what val was supposed to be
+            cpyImg.setVector(x, y, new THREE.Vector2(u_x, u_y))
         }
     }
+
+    this.vecField = cpyImg;
 }
 
 Fluid.prototype.advanceProgram = function(){
     // Steps   
-    // Clayton Comment on Simulation Step: 
-    // I think we're supposed to run these functions 
-    // over the entire grid (i.e. advection on all vectors, then diffusion 
-    // on all vectors, etc.) rather than one vector at a time (i.e. advection, 
-    // diffusion, forces, projection on this vector, then the next vector, etc.). 
 
     // one equation to do update question 
         // that gets called across the image 
         // do not overwrite old values 
         // after calling for every pixel update the whole image 
 
-    // debugger;
-
     
     this.advection(true); // u_a := advect field u through itself
     this.divergence(); // d := calculate divergence of u_a
-    this.calcPressure(); // p := calculate pressure based on d, using jacobi iteration
+    // this.calcPressure(); // p := calculate pressure based on d, using jacobi iteration
     this.subtract();                    // u := u_a - gradient of p
-    this.advection(false); // c := advect field c through velocity field u
-        
+    this.advection(false); // c := advect field c through velocity field u   
 }
 
 

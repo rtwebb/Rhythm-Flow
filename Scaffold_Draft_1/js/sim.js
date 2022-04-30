@@ -17,5 +17,5 @@ Sim.simulate = function() {
 Sim.update = function() {
     Scene.vecField = fluid.vecField.copyImg();
     Scene.colorField = fluid.colorField.copyImg();
-    // Scene.pressureField = fluid.pressureField.copyImg();
+    Scene.pressureField = fluid.pressureField.copyImg();
 }

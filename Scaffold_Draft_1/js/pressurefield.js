@@ -61,7 +61,7 @@ function Pressurefield(width, height, data) {
     return pressure;
   };
 
-  Pressurefield.prototype.setVector = function(x, y, pressure) {
+  Pressurefield.prototype.setPressure = function(x, y, pressure) {
     if (y >= 0 && x >= 0 && y < this.height && x < this.width) {
       var index = this.pressureIndex(x, y);
       this.data[index] = pressure;
