@@ -21,7 +21,7 @@ Renderer.init = function() {
 }
 
 Renderer.clearDisplay = function() {
-    Renderer.ctx.clearRect(0, 0, Scene.canvas.width, Scene.canvas.height);
+    Scene.ctx.clearRect(0, 0, Scene.canvas.width, Scene.canvas.height);
 };
 
 Renderer.animate = function() {
