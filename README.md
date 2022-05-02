@@ -1,5 +1,4 @@
 **"# Rhythm-Flow" **
-
 This is our music fluid dynamics simulator that changes based on musical attributes (frequency, volume, tempo, etc.). This repository builds upon the fluid simulator developed by Pavel Dobryakov: https://github.com/PavelDoGreat/WebGL-Fluid-Simulation. 
 
 
