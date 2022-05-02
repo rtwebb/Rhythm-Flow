@@ -236,15 +236,10 @@ function startGUI () {
     sunraysFolder.add(config, 'SUNRAYS_WEIGHT', 0.3, 1.0).name('weight');
 
     //music flow changer
-<<<<<<< HEAD
     let musicFolder = gui.addFolder('music');
     musicFolder.add(config, 'MUSIC_PLAY').name('Play').onFinishChange(updateKeywords);
     musicFolder.add(config, 'MUSIC_PAUSE').name('Pause').onFinishChange(updateKeywords);
     musicFolder.add(config, 'MUSIC_VOLUME', 0.3, 1.0).name('Volume');
-=======
-    // let musicFolder = gui.addFolder('music');
-    // musicFolder.add(config, 'MUSIC').name('disabled').onFinishChange(updateKeywords);
->>>>>>> a040db9741039d0b050893234b65270accdf97a4
 
     // enables person to take a screenshot - could delete
     let captureFolder = gui.addFolder('Capture');
