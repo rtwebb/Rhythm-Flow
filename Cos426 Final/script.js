@@ -95,6 +95,10 @@ let config = {
     SUNRAYS: true,
     SUNRAYS_RESOLUTION: 196,
     SUNRAYS_WEIGHT: 1.0,
+    MUSIC_PLAY: false,
+    MUSIC_PAUSE: true,
+    MUSIC_VOLUME: 0.0,
+
 }
 
 function pointerPrototype () {
@@ -236,10 +240,10 @@ function startGUI () {
     sunraysFolder.add(config, 'SUNRAYS_WEIGHT', 0.3, 1.0).name('weight');
 
     //music flow changer
-    let musicFolder = gui.addFolder('music');
-    musicFolder.add(config, 'MUSIC_PLAY').name('Play').onFinishChange(updateKeywords);
-    musicFolder.add(config, 'MUSIC_PAUSE').name('Pause').onFinishChange(updateKeywords);
-    musicFolder.add(config, 'MUSIC_VOLUME', 0.3, 1.0).name('Volume');
+    let musicFolder = gui.addFolder('Music');
+    musicFolder.add(config, 'MUSIC_PLAY').name('play').onFinishChange(updateKeywords);
+    musicFolder.add(config, 'MUSIC_PAUSE').name('pause').onFinishChange(updateKeywords);
+    musicFolder.add(config, 'MUSIC_VOLUME', 0.0, 1.0).name('volume');
 
     // enables person to take a screenshot - could delete
     let captureFolder = gui.addFolder('Capture');
@@ -249,7 +253,7 @@ function startGUI () {
 
     // would change to link to our github
     let github = gui.add({ fun : () => {
-        window.open('https://github.com/PavelDoGreat/WebGL-Fluid-Simulation');
+        window.open('https://rtwebb.github.io/Rhythm-Flow/');
         ga('send', 'event', 'link button', 'github');
     } }, 'fun').name('Github');
     github.__li.className = 'cr function bigFont';
@@ -1115,6 +1119,7 @@ function initSunraysFramebuffers () {
     sunraysTemp = createFBO(res.width, res.height, r.internalFormat, r.format, texType, filtering);
 }
 
+
 function createFBO (w, h, internalFormat, format, type, param) {
     gl.activeTexture(gl.TEXTURE0);
     let texture = gl.createTexture();
@@ -1500,7 +1505,7 @@ function blur (target, temp, iterations) {
 function applyMusic(){
 
     // call frequency analysis
-
+    analyzeAudio();
     // call volume analysis 
 
 
