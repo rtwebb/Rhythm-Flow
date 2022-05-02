@@ -23,6 +23,100 @@ SOFTWARE.
 */
 
 'use strict';
+//////////////////////////////////////////////////////////
+// MUSIC ANALYSIS
+//////////////////////////////////////////////////////////
+
+/*
+-----------------------------------------------------------------
+FREQUENCY ANALYSIS
+-----------------------------------------------------------------
+*/
+//ctx.canvas.addEventListener('keydown', analyzeAudio);
+let ctx = canvas.getContext("2d");
+ctx.canvas.addEventListener('click', analyzeAudio);   
+function analyzeAudio(){
+    ctx.canvas.removeEventListener('click', analyzeAudio);
+    
+    
+      // make a Web Audio Context
+  const context = new AudioContext();
+  const analyser = context.createAnalyser();
+
+  // Make a buffer to receive the audio data
+  const numPoints = analyser.frequencyBinCount;
+  const audioDataArray = new Uint8Array(numPoints);
+
+  function render() {
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+    // get the current audio data
+    analyser.getByteFrequencyData(audioDataArray);
+
+    const width = ctx.canvas.width;
+    const height = ctx.canvas.height;
+    const size = 5;
+
+    // draw a point every size pixels
+    for (let x = 0; x < width; x += size) {
+      // compute the audio data for this point
+      const ndx = x * numPoints / width | 0;
+      // get the audio data and make it go from 0 to 1
+      const audioValue = audioDataArray[ndx] / 255;
+      // draw a rect size by size big
+      const y = audioValue * height;
+      ctx.fillRect(x, y, size, size);
+    }
+    requestAnimationFrame(render);
+  }
+  requestAnimationFrame(render);
+
+  // Make a audio node
+  const audio = new Audio();
+  audio.loop = true;
+  audio.autoplay = true;
+
+  // this line is only needed if the music you are trying to play is on a
+  // different server than the page trying to play it.
+  // It asks the server for permission to use the music. If the server says "no"
+  // then you will not be able to play the music
+  // Note if you are using music from the same domain 
+  // **YOU MUST REMOVE THIS LINE** or your server must give permission.
+  audio.crossOrigin = "anonymous";
+
+  // call `handleCanplay` when it music can be played
+  audio.addEventListener('canplay', handleCanplay);
+  audio.src = "https://twgljs.org/examples/sounds/DOCTOR%20VOX%20-%20Level%20Up.mp3";
+  audio.load();
+
+
+  function handleCanplay() {
+    // connect the audio element to the analyser node and the analyser node
+    // to the main Web Audio context
+    const source = context.createMediaElementSource(audio);
+    source.connect(analyser);
+    analyser.connect(context.destination);
+  }
+
+
+    // // create audio context
+    // let audioElement = document.getElementById("track");
+    // const audioCtx = new AudioContext();
+    // const analyser = audioCtx.createAnalyser();
+    
+    // // define size of array
+    // analyser.fftSize = 2048;
+    // let source = audioCtx.createMediaElementSource(audioElement);
+    
+    // source.connect(analyser);
+    // source.connect(audioCtx.destination);
+    // let data = new Uint8Array(analyser.frequencyBinCount);
+    // analyser.getByteFrequencyData(data); //passing our Uint data array
+
+}
+
+
+
 /*
 -----------------------------------------------------------------
 TEMPO ANALYSIS
@@ -70,6 +164,7 @@ const canvas = document.getElementsByTagName('canvas')[0];
 resizeCanvas();
 var play = function() {playMp3()};
 var pause = function() {pauseMp3()};
+var advectObj = function() {sporadicAdvect()};
 let config = {
     SIM_RESOLUTION: 128,
     DYE_RESOLUTION: 1024,
@@ -100,6 +195,11 @@ let config = {
     MUSIC_PLAY: play,
     MUSIC_PAUSE: pause,
     MUSIC_VOLUME: 0.0,
+    WACKY: true,
+    WACKY_DISSIPATION: 'Regular',
+    WACKY_VORTICITY: 'Regular',
+    WACKY_CURL: 'Regular',
+    WACKY_SPORADICADVECT: advectObj
 
 }
 
@@ -243,10 +343,16 @@ function startGUI () {
 
     //music flow changer
     let musicFolder = gui.addFolder('Music');
-    
     musicFolder.add(config, 'MUSIC_PLAY').name('play').onFinishChange(updateKeywords);
     musicFolder.add(config, 'MUSIC_PAUSE').name('pause').onFinishChange(updateKeywords);
     musicFolder.add(config, 'MUSIC_VOLUME', 0.0, 1.0).name('volume');
+
+    // wacky changes 
+    let wackyFolder = gui.addFolder('Wacky');
+    wackyFolder.add(config, 'WACKY_DISSIPATION', ['Regular', 'Fast', 'Slow', 'None'] ).name('dissipation');
+    wackyFolder.add(config, 'WACKY_VORTICITY', ['Regular', 'Fast', 'Slow', 'None']).name('vorticity');
+    wackyFolder.add(config, 'WACKY_CURL', ['Regular', 'Fast', 'Slow', 'None']).name('curl');
+    wackyFolder.add(config, 'WACKY_SPORADICADVECT').name('sporadic advect').onFinishChange(updateKeywords);
 
     // enables person to take a screenshot - could delete
     let captureFolder = gui.addFolder('Capture');
@@ -266,92 +372,6 @@ function startGUI () {
     githubIcon.className = 'icon github';
 
 }
-
-
-
-//ctx.canvas.addEventListener('keydown', analyzeAudio);
-let ctx = canvas.getContext("2d");
-ctx.canvas.addEventListener('click', analyzeAudio);   
-function analyzeAudio(){
-    ctx.canvas.removeEventListener('click', analyzeAudio);
-    
-    
-      // make a Web Audio Context
-  const context = new AudioContext();
-  const analyser = context.createAnalyser();
-
-  // Make a buffer to receive the audio data
-  const numPoints = analyser.frequencyBinCount;
-  const audioDataArray = new Uint8Array(numPoints);
-
-  function render() {
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
-    // get the current audio data
-    analyser.getByteFrequencyData(audioDataArray);
-
-    const width = ctx.canvas.width;
-    const height = ctx.canvas.height;
-    const size = 5;
-
-    // draw a point every size pixels
-    for (let x = 0; x < width; x += size) {
-      // compute the audio data for this point
-      const ndx = x * numPoints / width | 0;
-      // get the audio data and make it go from 0 to 1
-      const audioValue = audioDataArray[ndx] / 255;
-      // draw a rect size by size big
-      const y = audioValue * height;
-      ctx.fillRect(x, y, size, size);
-    }
-    requestAnimationFrame(render);
-  }
-  requestAnimationFrame(render);
-
-  // Make a audio node
-  const audio = new Audio();
-  audio.loop = true;
-  audio.autoplay = true;
-
-  // this line is only needed if the music you are trying to play is on a
-  // different server than the page trying to play it.
-  // It asks the server for permission to use the music. If the server says "no"
-  // then you will not be able to play the music
-  // Note if you are using music from the same domain 
-  // **YOU MUST REMOVE THIS LINE** or your server must give permission.
-  audio.crossOrigin = "anonymous";
-
-  // call `handleCanplay` when it music can be played
-  audio.addEventListener('canplay', handleCanplay);
-  audio.src = "https://twgljs.org/examples/sounds/DOCTOR%20VOX%20-%20Level%20Up.mp3";
-  audio.load();
-
-
-  function handleCanplay() {
-    // connect the audio element to the analyser node and the analyser node
-    // to the main Web Audio context
-    const source = context.createMediaElementSource(audio);
-    source.connect(analyser);
-    analyser.connect(context.destination);
-  }
-
-
-    // // create audio context
-    // let audioElement = document.getElementById("track");
-    // const audioCtx = new AudioContext();
-    // const analyser = audioCtx.createAnalyser();
-    
-    // // define size of array
-    // analyser.fftSize = 2048;
-    // let source = audioCtx.createMediaElementSource(audioElement);
-    
-    // source.connect(analyser);
-    // source.connect(audioCtx.destination);
-    // let data = new Uint8Array(analyser.frequencyBinCount);
-    // analyser.getByteFrequencyData(data); //passing our Uint data array
-
-}
-
 
 function isMobile () {
     return /Mobi|Android/i.test(navigator.userAgent);
