@@ -32,21 +32,35 @@ SOFTWARE.
 FREQUENCY ANALYSIS
 -----------------------------------------------------------------
 */
-//ctx.canvas.addEventListener('keydown', analyzeAudio);
-// let ctx = canvas.getContext("2d");
-// ctx.canvas.addEventListener('click', analyzeAudio);   
-function analyzeAudio(){
-    ctx.canvas.removeEventListener('click', analyzeAudio);
-    
-    // define size of array
-    analyser.fftSize = 2048;
-    let source = audioCtx.createMediaElementSource(audioElement);
-    
-    source.connect(analyser);
-    source.connect(audioCtx.destination);
-    let data = new Uint8Array(analyser.frequencyBinCount);
-    analyser.getByteFrequencyData(data); //passing our Uint data array
+var Frequency = Frequency || {};
 
+const audioCtx = new AudioContext();
+
+// pulling audio
+const audio = new Audio();
+audio.src = document.getElementById("water").src;
+audio.load();
+var source = audioCtx.createMediaElementSource(audio);
+
+// create audio analyzer
+const analyser = audioCtx.createAnalyser();
+// analyser.fftSize = 2048;
+// Frequency.data = new Uint8Array(analyser.frequencyBinCount);
+analyser.fftSize = 256;
+const bufferLength = analyser.frequencyBinCount;
+const data = new Float32Array(bufferLength);
+
+// set up audio node connection
+source.connect(analyser);
+source.connect(audioCtx.destination);
+
+Frequency.isSet = false;
+// https://medium.com/swlh/building-a-audio-visualizer-with-javascript-324b8d420e7
+function frequencyAnalyzer(){
+    // create audio context
+    //analyser.getByteFrequencyData(data); //passing our Uint data array
+    analyser.getFloatFrequencyData(data);
+    console.log(data);
 }
 
 /*
@@ -125,7 +139,6 @@ let config = {
     MUSIC: false,
     MUSIC_PLAY: null,
     MUSIC_PAUSE: null,
-    MUSIC_VOLUME: 0.0,
     WACKY: true,
     WACKY_DISSIPATION: 'Regular',
     WACKY_VORTICITY: 'Regular',
@@ -278,7 +291,6 @@ function startGUI () {
     let musicFolder = gui.addFolder('Music');
     musicFolder.add(config, 'MUSIC_PLAY').name('play').onFinishChange(updateKeywords);
     musicFolder.add(config, 'MUSIC_PAUSE').name('pause').onFinishChange(updateKeywords);
-    musicFolder.add(config, 'MUSIC_VOLUME', 0.0, 1.0).name('volume');
 
     // wacky changes 
     let wackyFolder = gui.addFolder('Wacky');
@@ -1478,7 +1490,7 @@ function pauseMp3() {
 function applyMusic(){
     if (config.MUSIC) {
         // call frequency analysis
-        // analyzeAudio();
+        frequencyAnalyzer();
         // call volume analysis 
 
 
