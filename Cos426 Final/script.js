@@ -33,8 +33,8 @@ FREQUENCY ANALYSIS
 -----------------------------------------------------------------
 */
 //ctx.canvas.addEventListener('keydown', analyzeAudio);
-let ctx = canvas.getContext("2d");
-ctx.canvas.addEventListener('click', analyzeAudio);   
+// let ctx = canvas.getContext("2d");
+// ctx.canvas.addEventListener('click', analyzeAudio);   
 function analyzeAudio(){
     ctx.canvas.removeEventListener('click', analyzeAudio);
     
@@ -144,8 +144,9 @@ async function getSong() {
 getSong().then((audioBuffer) => {
     Tempo.audioBuffer = audioBuffer;
     bpm.analyze(Tempo.audioBuffer).then((tempo) => {
-        Tempo.bpm = tempo; // BPM = Beats Per Minute
+        Tempo.bpm = Math.round(tempo); // BPM = Beats Per Minute
         Tempo.isSet = true;
+        Tempo.lastSplat = new Date().getTime();
     }).then(() => {
         console.log(Tempo);
     }).catch((err) => {
@@ -162,8 +163,6 @@ Simulation section
 
 const canvas = document.getElementsByTagName('canvas')[0];
 resizeCanvas();
-var play = function() {playMp3()};
-var pause = function() {pauseMp3()};
 var advectObj = function() {sporadicAdvect()};
 let config = {
     SIM_RESOLUTION: 128,
@@ -191,9 +190,9 @@ let config = {
     SUNRAYS: true,
     SUNRAYS_RESOLUTION: 196,
     SUNRAYS_WEIGHT: 1.0,
-    MUSIC: true,
-    MUSIC_PLAY: play,
-    MUSIC_PAUSE: pause,
+    MUSIC: false,
+    MUSIC_PLAY: null,
+    MUSIC_PAUSE: null,
     MUSIC_VOLUME: 0.0,
     WACKY: true,
     WACKY_DISSIPATION: 'Regular',
@@ -202,6 +201,8 @@ let config = {
     WACKY_SPORADICADVECT: advectObj
 
 }
+config.MUSIC_PLAY = function() {playMp3(); config.MUSIC = true};
+config.MUSIC_PAUSE = function() {pauseMp3(); config.MUSIC = false;};
 
 function pointerPrototype () {
     this.id = -1;
@@ -1283,6 +1284,9 @@ function update () {
         initFramebuffers();
     updateColors(dt);
     applyInputs();
+    if (config.MUSIC){
+        applyMusic();
+    }
     if (!config.PAUSED)
         step(dt);
     render(null);
@@ -1540,14 +1544,23 @@ function pauseMp3() {
 
 // function that controls music function
 function applyMusic(){
+    if (config.MUSIC) {
+        // call frequency analysis
+        // analyzeAudio();
+        // call volume analysis 
 
-    // call frequency analysis
-    analyzeAudio();
-    // call volume analysis 
 
-
-    // call tempo analysis 
-
+        // call tempo analysis 
+        if (Tempo.isSet) {
+            const current = new Date().getTime();
+            // if last splat was more than the amount of time between each measure, 
+            // splat again
+            if ((current - Tempo.lastSplat) / 1000 > (60 / Tempo.bpm) * 4) {
+                multipleSplats(1);
+                Tempo.lastSplat = new Date().getTime();
+            }
+        }
+    }
 
 }
 
