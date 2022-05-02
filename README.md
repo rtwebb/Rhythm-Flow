@@ -17,5 +17,6 @@ Music References
 <hr>
 <ul>
   <li> https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API/Advanced_techniques</li>
-  <li> https://stackoverflow.com/questions/53987982/why-does-audio-not-play-in-javascript  </li>
+  <li> Playing Audio: https://stackoverflow.com/questions/53987982/why-does-audio-not-play-in-javascript  </li>
+  <li> Frequency Analysis: https://medium.com/swlh/building-a-audio-visualizer-with-javascript-324b8d420e7</li>
 </ul>
