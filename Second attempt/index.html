@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- the next three lines try to discourage browser from keeping page in cache -->
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="-1">
+    <meta http-equiv="cache-control" content="no-store">
+
+    <meta charset="UTF-8">
+    <title> COS426 Fluid Simulator &mdash; Image Processing &mdash; Interactive</title>
+    <link href="css/style.css" type="text/css" rel="stylesheet"/>
+</head>
+
+<body>
+    <div id="main_div">
+        <h1> <div class=assignment>COS426 Fluid Simulator</div>
+        <h2 id='student'></h2>
+
+        <canvas id="canvas"> </canvas>
+    </div>
+
+    <!-- External APIs needed -->
+    <script src="libjs/dat.gui.js"> </script>
+    <script src="libjs/three.min.js"></script>
+
+    <!-- Constants -->
+    <script src="js/params.js"></script>
+
+    <!-- Javascript Modules for Simulation -->
+    <script src="js/image.js"></script>
+    <script src="js/pressurefield.js"></script>
+    <script src="js/scene.js"></script>
+    <script src="js/fluid.js"></script>
+    <script src="js/sim.js"></script>
+
+    <!-- Main rendering loop -->
+    <script src="js/renderer.js"></script>
+</body>
+</html>

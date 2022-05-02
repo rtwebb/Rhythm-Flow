@@ -23,8 +23,48 @@ SOFTWARE.
 */
 
 'use strict';
+/*
+-----------------------------------------------------------------
+TEMPO ANALYSIS
+-----------------------------------------------------------------
+*/
 
-// Simulation section
+var Tempo = Tempo || {};
+// Initialize Tempo to be unset
+Tempo.isSet = false;
+// Create new instance of AudioContext
+Tempo.audioContext = new AudioContext();
+// Adapted From: https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API/Advanced_techniques
+async function getFile(audioContext, filepath) {
+    const response = await fetch(filepath);
+    const arrayBuffer = await response.arrayBuffer();
+    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+    return audioBuffer;
+}
+async function getSong() {
+    const audioElement = document.getElementById('track');
+    const filePath = audioElement.src;
+    const sample = await getFile(Tempo.audioContext, filePath);
+    return sample;
+}
+getSong().then((audioBuffer) => {
+    Tempo.audioBuffer = audioBuffer;
+    bpm.analyze(Tempo.audioBuffer).then((tempo) => {
+        Tempo.bpm = tempo; // BPM = Beats Per Minute
+        Tempo.isSet = true;
+    }).then(() => {
+        console.log(Tempo);
+    }).catch((err) => {
+        // There was an error, don't use tempo for now :(
+        Tempo.isSet = false;
+    });
+});
+
+/*
+-----------------------------------------------------------------
+Simulation section
+-----------------------------------------------------------------
+*/
 
 const canvas = document.getElementsByTagName('canvas')[0];
 resizeCanvas();
@@ -196,10 +236,15 @@ function startGUI () {
     sunraysFolder.add(config, 'SUNRAYS_WEIGHT', 0.3, 1.0).name('weight');
 
     //music flow changer
+<<<<<<< HEAD
     let musicFolder = gui.addFolder('music');
     musicFolder.add(config, 'MUSIC_PLAY').name('Play').onFinishChange(updateKeywords);
     musicFolder.add(config, 'MUSIC_PAUSE').name('Pause').onFinishChange(updateKeywords);
     musicFolder.add(config, 'MUSIC_VOLUME', 0.3, 1.0).name('Volume');
+=======
+    // let musicFolder = gui.addFolder('music');
+    // musicFolder.add(config, 'MUSIC').name('disabled').onFinishChange(updateKeywords);
+>>>>>>> a040db9741039d0b050893234b65270accdf97a4
 
     // enables person to take a screenshot - could delete
     let captureFolder = gui.addFolder('Capture');
@@ -1251,6 +1296,7 @@ function updateColors (dt) {
 }
 
 function applyInputs () {
+
     if (splatStack.length > 0)
         multipleSplats(splatStack.pop());
 
