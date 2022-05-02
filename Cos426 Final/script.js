@@ -68,7 +68,8 @@ Simulation section
 
 const canvas = document.getElementsByTagName('canvas')[0];
 resizeCanvas();
-
+var play = function() {playMp3()};
+var pause = function() {pauseMp3()};
 let config = {
     SIM_RESOLUTION: 128,
     DYE_RESOLUTION: 1024,
@@ -95,8 +96,9 @@ let config = {
     SUNRAYS: true,
     SUNRAYS_RESOLUTION: 196,
     SUNRAYS_WEIGHT: 1.0,
-    MUSIC_PLAY: false,
-    MUSIC_PAUSE: true,
+    MUSIC: true,
+    MUSIC_PLAY: play,
+    MUSIC_PAUSE: pause,
     MUSIC_VOLUME: 0.0,
 
 }
@@ -241,6 +243,7 @@ function startGUI () {
 
     //music flow changer
     let musicFolder = gui.addFolder('Music');
+    
     musicFolder.add(config, 'MUSIC_PLAY').name('play').onFinishChange(updateKeywords);
     musicFolder.add(config, 'MUSIC_PAUSE').name('pause').onFinishChange(updateKeywords);
     musicFolder.add(config, 'MUSIC_VOLUME', 0.0, 1.0).name('volume');
@@ -263,6 +266,8 @@ function startGUI () {
     githubIcon.className = 'icon github';
 
 }
+
+
 
 //ctx.canvas.addEventListener('keydown', analyzeAudio);
 let ctx = canvas.getContext("2d");
@@ -1500,6 +1505,18 @@ function blur (target, temp, iterations) {
         blit(target);
     }
 }
+
+
+
+function playMp3() { 
+    let audioContainer = document.getElementById("demo"); 
+    audioContainer.play(); 
+  } 
+  
+function pauseMp3() { 
+    let audioContainer = document.getElementById("demo"); 
+    audioContainer.pause(); 
+} 
 
 // function that controls music function
 function applyMusic(){
