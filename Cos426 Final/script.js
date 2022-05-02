@@ -148,10 +148,10 @@ let config = {
     WACKY_SPORADICADVECT: advectObj
 
 }
-config.MUSIC_PLAY = function() {playMp3(); config.MUSIC = true};
+config.MUSIC_PLAY = function() {playMp3(); config.MUSIC = true;};
 config.MUSIC_PAUSE = function() {pauseMp3(); config.MUSIC = false;};
-config.WACKY_STROBELIGHTS = function() {strobeLights(); config.WACKY_STROBELIGHTS = true;};
-config.WACKY_STROBEMARKER = function() {strobeMarker(); config.WACKY_STROBEMARKER = true;};
+config.WACKY_STROBELIGHTS = function() {strobeLights(); config.WACKY_STROBELIGHTS = true; config.VELOCITY_DISSIPATION = 1.05;};
+config.WACKY_STROBEMARKER = function() {strobeMarker(); config.WACKY_STROBEMARKER = true; config.VELOCITY_DISSIPATION = .92;};
 
 function pointerPrototype () {
     this.id = -1;
@@ -827,7 +827,7 @@ const advectionShader = compileShader(gl.FRAGMENT_SHADER, `
         vec4 result = texture2D(uSource, coord);
     #endif
         float decay = 1.0 + dissipation * dt;
-        gl_FragColor = result / decay;
+        gl_FragColor = result / decay * -dissipation;
     }`,
     ext.supportLinearFiltering ? null : ['MANUAL_FILTERING']
 );
@@ -1218,6 +1218,7 @@ function updateKeywords () {
     if (config.BLOOM) displayKeywords.push("BLOOM");
     if (config.SUNRAYS) displayKeywords.push("SUNRAYS");
     if (config.MUSIC) displayKeywords.push("MUSIC");
+    if (config.MUSIC) displayKeywords.push("WACKY");
     displayMaterial.setKeywords(displayKeywords);
 }
 
