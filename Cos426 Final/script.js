@@ -143,11 +143,15 @@ let config = {
     WACKY_DISSIPATION: 'Regular',
     WACKY_VORTICITY: 'Regular',
     WACKY_CURL: 'Regular',
+    WACKY_STROBELIGHTS: null,
+    WACKY_STROBEMARKER: null,
     WACKY_SPORADICADVECT: advectObj
 
 }
 config.MUSIC_PLAY = function() {playMp3(); config.MUSIC = true};
 config.MUSIC_PAUSE = function() {pauseMp3(); config.MUSIC = false;};
+config.WACKY_STROBELIGHTS = function() {strobeLights(); config.WACKY_STROBELIGHTS = true;};
+config.WACKY_STROBEMARKER = function() {strobeMarker(); config.WACKY_STROBEMARKER = true;};
 
 function pointerPrototype () {
     this.id = -1;
@@ -292,11 +296,14 @@ function startGUI () {
     musicFolder.add(config, 'MUSIC_PLAY').name('play').onFinishChange(updateKeywords);
     musicFolder.add(config, 'MUSIC_PAUSE').name('pause').onFinishChange(updateKeywords);
 
+
     // wacky changes 
     let wackyFolder = gui.addFolder('Wacky');
     wackyFolder.add(config, 'WACKY_DISSIPATION', ['Regular', 'Fast', 'Slow', 'None'] ).name('dissipation');
     wackyFolder.add(config, 'WACKY_VORTICITY', ['Regular', 'Fast', 'Slow', 'None']).name('vorticity');
     wackyFolder.add(config, 'WACKY_CURL', ['Regular', 'Fast', 'Slow', 'None']).name('curl');
+    wackyFolder.add(config, 'WACKY_STROBELIGHTS').name('strobe lights').onFinishChange(updateKeywords);
+    wackyFolder.add(config, 'WACKY_STROBEMARKER').name('strobe marker').onFinishChange(updateKeywords);
     wackyFolder.add(config, 'WACKY_SPORADICADVECT').name('sporadic advect').onFinishChange(updateKeywords);
 
     // enables person to take a screenshot - could delete
@@ -1356,6 +1363,9 @@ function render (target) {
     if (config.MUSIC){
         applyMusic();
     }
+    if (config.WACKY){
+        applyWacky();
+    }
 
     if (target == null || !config.TRANSPARENT) {
         gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
@@ -1474,6 +1484,9 @@ function blur (target, temp, iterations) {
     }
 }
 
+//////////////////////////////////////////////////////////
+// Added Functions
+//////////////////////////////////////////////////////////
 
 
 function playMp3() { 
@@ -1505,6 +1518,18 @@ function applyMusic(){
             }
         }
     }
+
+}
+
+// function strobeLights(){
+//     advection shader
+// }
+
+// function strobeMarker(){
+    
+// }
+
+function applyWacky(){
 
 }
 
