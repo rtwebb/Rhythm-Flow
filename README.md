@@ -4,7 +4,7 @@ This is our music fluid dynamics simulator that changes based on musical attribu
 
 
 **REFERENCES**
-<br>
+<br><br>
 Fluid References
 <hr>
 <ul>
