@@ -197,7 +197,9 @@ function startGUI () {
 
     //music flow changer
     let musicFolder = gui.addFolder('music');
-    musicFolder.add(config, 'MUSIC').name('disabled').onFinishChange(updateKeywords);
+    musicFolder.add(config, 'MUSIC_PLAY').name('Play').onFinishChange(updateKeywords);
+    musicFolder.add(config, 'MUSIC_PAUSE').name('Pause').onFinishChange(updateKeywords);
+    musicFolder.add(config, 'MUSIC_VOLUME', 0.3, 1.0).name('Volume');
 
     // enables person to take a screenshot - could delete
     let captureFolder = gui.addFolder('Capture');
@@ -218,18 +220,87 @@ function startGUI () {
 
 }
 
-
+//ctx.canvas.addEventListener('keydown', analyzeAudio);
+let ctx = canvas.getContext("2d");
+ctx.canvas.addEventListener('click', analyzeAudio);   
 function analyzeAudio(){
-    let ctx = canvas.getContext("2d");
-    let audioElement = document.getElementById("source");
-    let audioCtx = new AudioContext();
-    let analyser = audioCtx.createAnalyser();
-    analyser.fftSize = 2048;
-    let source = audioCtx.createMediaElementSource(audioElement);
-    source.connect(analyser);
-    source.connect(audioCtx.destination);
-
+    ctx.canvas.removeEventListener('click', analyzeAudio);
     
+    
+      // make a Web Audio Context
+  const context = new AudioContext();
+  const analyser = context.createAnalyser();
+
+  // Make a buffer to receive the audio data
+  const numPoints = analyser.frequencyBinCount;
+  const audioDataArray = new Uint8Array(numPoints);
+
+  function render() {
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+    // get the current audio data
+    analyser.getByteFrequencyData(audioDataArray);
+
+    const width = ctx.canvas.width;
+    const height = ctx.canvas.height;
+    const size = 5;
+
+    // draw a point every size pixels
+    for (let x = 0; x < width; x += size) {
+      // compute the audio data for this point
+      const ndx = x * numPoints / width | 0;
+      // get the audio data and make it go from 0 to 1
+      const audioValue = audioDataArray[ndx] / 255;
+      // draw a rect size by size big
+      const y = audioValue * height;
+      ctx.fillRect(x, y, size, size);
+    }
+    requestAnimationFrame(render);
+  }
+  requestAnimationFrame(render);
+
+  // Make a audio node
+  const audio = new Audio();
+  audio.loop = true;
+  audio.autoplay = true;
+
+  // this line is only needed if the music you are trying to play is on a
+  // different server than the page trying to play it.
+  // It asks the server for permission to use the music. If the server says "no"
+  // then you will not be able to play the music
+  // Note if you are using music from the same domain 
+  // **YOU MUST REMOVE THIS LINE** or your server must give permission.
+  audio.crossOrigin = "anonymous";
+
+  // call `handleCanplay` when it music can be played
+  audio.addEventListener('canplay', handleCanplay);
+  audio.src = "https://twgljs.org/examples/sounds/DOCTOR%20VOX%20-%20Level%20Up.mp3";
+  audio.load();
+
+
+  function handleCanplay() {
+    // connect the audio element to the analyser node and the analyser node
+    // to the main Web Audio context
+    const source = context.createMediaElementSource(audio);
+    source.connect(analyser);
+    analyser.connect(context.destination);
+  }
+
+
+    // // create audio context
+    // let audioElement = document.getElementById("track");
+    // const audioCtx = new AudioContext();
+    // const analyser = audioCtx.createAnalyser();
+    
+    // // define size of array
+    // analyser.fftSize = 2048;
+    // let source = audioCtx.createMediaElementSource(audioElement);
+    
+    // source.connect(analyser);
+    // source.connect(audioCtx.destination);
+    // let data = new Uint8Array(analyser.frequencyBinCount);
+    // analyser.getByteFrequencyData(data); //passing our Uint data array
+
 }
 
 
@@ -1263,6 +1334,9 @@ function render (target) {
         applySunrays(dye.read, dye.write, sunrays);
         blur(sunrays, sunraysTemp, 1);
     }
+    if (config.MUSIC){
+        applyMusic();
+    }
 
     if (target == null || !config.TRANSPARENT) {
         gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
@@ -1379,6 +1453,19 @@ function blur (target, temp, iterations) {
         gl.uniform1i(blurProgram.uniforms.uTexture, temp.attach(0));
         blit(target);
     }
+}
+
+// function that controls music function
+function applyMusic(){
+
+    // call frequency analysis
+
+    // call volume analysis 
+
+
+    // call tempo analysis 
+
+
 }
 
 function splatPointer (pointer) {
