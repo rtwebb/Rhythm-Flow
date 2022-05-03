@@ -33,34 +33,38 @@ FREQUENCY ANALYSIS
 -----------------------------------------------------------------
 */
 var Frequency = Frequency || {};
-
-const audioCtx = new AudioContext();
-
-// pulling audio
+var audioCtx;
+var source;
+var analyser;
 const audio = new Audio();
-audio.src = document.getElementById("water").src;
-audio.load();
-var source = audioCtx.createMediaElementSource(audio);
 
-// create audio analyzer
-const analyser = audioCtx.createAnalyser();
-// analyser.fftSize = 2048;
-// Frequency.data = new Uint8Array(analyser.frequencyBinCount);
-analyser.fftSize = 256;
-const bufferLength = analyser.frequencyBinCount;
-const data = new Float32Array(bufferLength);
 
-// set up audio node connection
-source.connect(analyser);
-source.connect(audioCtx.destination);
-
-Frequency.isSet = false;
 // https://medium.com/swlh/building-a-audio-visualizer-with-javascript-324b8d420e7
 function frequencyAnalyzer(){
+
+    const buffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 1, audioCtx.sampleRate);
+    const channelData = buffer.getChannelData(0);
+    
+
+    audioCtx.decodeAudioData(ab, (buffer) => {
+        source = audioCtx.createBufferSource();
+        source.connect(analyser);
+        source.buffer = buffer;
+        source.start(0);
+        viewBufferData();
+
     // create audio context
-    //analyser.getByteFrequencyData(data); //passing our Uint data array
-    analyser.getFloatFrequencyData(data);
-    console.log(data);
+
+})
+
+
+// function viewBufferData(){
+//     setInterval(function(){
+//         Frequency.data = new Uint8Array(analyser.frequencyBinCount);
+//         analyser.getByteFrequencyData(Frequency.data); //passing our Uint data array
+//         //xanalyser.getFloatFrequencyData(data);
+//         console.log(Frequency.data);
+//     }, 1000)
 }
 
 /*
@@ -1550,6 +1554,23 @@ MUSIC FUNCTIONS
 function playMp3() { 
     let audioContainer = document.getElementById("demo"); 
     audioContainer.play(); 
+
+    Frequency = Frequency || {};
+
+    audioCtx = new AudioContext();
+
+    // pulling audio
+    audio.src = document.getElementById("water").src;
+    console.log(audio.src)
+    audio.load();
+    source = audioCtx.createMediaElementSource(audio);
+
+    // create audio analyzer
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 2048;
+    
+    // set up audio node connection
+    source.connect(analyser);
   } 
   
 function pauseMp3() { 
@@ -1612,7 +1633,6 @@ function wackyDissipation(){
 // implementing wacky vorticity
 function wackyVorticity(){
     let val = config.WACKY_VORTICITY; 
-    console.log(val)
     if(val === 'High'){
         config.WACKY_VORTICITY_FLAG = 3.0;
     }
