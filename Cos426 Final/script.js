@@ -1651,10 +1651,18 @@ function applyWacky(){
     wackyVorticity();
 }
 
+// HELPER FOR WACKY COLLISION EFFECT 
+// function mirror(coord) {
+//     return 0.5 - (coord - 0.5);
+// }
+
 function splatPointer (pointer) {
     let dx = pointer.deltaX * config.SPLAT_FORCE;
     let dy = pointer.deltaY * config.SPLAT_FORCE;
+    // NOTES: texcoords are from 0 to 1, 
+    // I think deltaX is the displacement of the cursor
     splat(pointer.texcoordX, pointer.texcoordY, dx, dy, pointer.color);
+    // splat(mirror(pointer.texcoordX), mirror(pointer.texcoordY), mirror(dx), mirror(dy), pointer.color);
 }
 
 function multipleSplats (amount) {
