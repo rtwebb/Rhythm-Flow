@@ -127,7 +127,8 @@ let config = {
     WACKY_VORTICITY: 'Regular',
     WACKY_CURL: 'Regular',
     WACKY_CURL_FLAG: 0.0,
-    WACKY_STROBEOFF: null,
+    WACKY_MOTION: 'Regular',
+    WACKY_MOTION_FLAG: false,
     WACKY_MIRRORADVECT: false
 }
 config.MUSIC_PLAY = function() {playMp3(); config.MUSIC = true;};
@@ -283,6 +284,7 @@ function startGUI () {
     wackyFolder.add(config, 'WACKY_DISSIPATION', ['Regular', 'Fast', 'Slow', 'None', 'Strobe', 'Marker'] ).name('dissipation');
     wackyFolder.add(config, 'WACKY_VORTICITY', ['Regular', 'High', 'None']).name('vorticity');
     wackyFolder.add(config, 'WACKY_CURL', ['Tight', 'Regular', 'Loose']).name('curl');
+    wackyFolder.add(config, 'WACKY_MOTION', ['Regular', 'Opposite']).name('motion');
     wackyFolder.add(config, 'WACKY_MIRRORADVECT').name('mirror advect').onFinishChange(updateKeywords);
 
     // enables person to take a screenshot - could delete
@@ -1652,19 +1654,32 @@ function wackyCurl(){
 
 }
 
+// // HELPER FOR WACKY COLLISION EFFECT 
+function mirror(coord) {
+    return 0.5 - (coord - 0.5);
+}
+
+function wackyMotion(){
+    if (config.WACKY_MOTION === 'Opposite'){
+        config.WACKY_MOTION_FLAG = true;
+    }
+    else{
+        config.WACKY_MOTION_FLAG = false;
+    }
+    
+   
+}
+
 function applyWacky(){
 
     // function for dissipation
     wackyDissipation();
     wackyVorticity();
     wackyCurl();
+    wackyMotion();
 
 }
 
-// // HELPER FOR WACKY COLLISION EFFECT 
-function mirror(coord) {
-    return 0.5 - (coord - 0.5);
-}
 
 function splatPointer (pointer) {
     let dx = pointer.deltaX * config.SPLAT_FORCE;
@@ -1672,7 +1687,11 @@ function splatPointer (pointer) {
     // NOTES: texcoords are from 0 to 1, 
     // I think deltaX is the displacement of the cursor
     splat(pointer.texcoordX, pointer.texcoordY, dx, dy, pointer.color);
-    splat(mirror(pointer.texcoordY), mirror(pointer.texcoordX), mirror(dy), mirror(dx), pointer.color);
+    if (config.WACKY_MOTION_FLAG === true){
+        splat(mirror(pointer.texcoordX), mirror(pointer.texcoordY), mirror(dx), mirror(dy), pointer.color);
+    }
+        
+    //splat(mirror(pointer.texcoordY), mirror(pointer.texcoordX), mirror(dy), mirror(dx), pointer.color);
 }
 
 function multipleSplats (amount) {
