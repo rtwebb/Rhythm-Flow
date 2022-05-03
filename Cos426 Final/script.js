@@ -44,7 +44,7 @@ function frequencyAnalyzer(){
 
     const buffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 1, audioCtx.sampleRate);
     const channelData = buffer.getChannelData(0);
-    
+
 
     audioCtx.decodeAudioData(ab, (buffer) => {
         source = audioCtx.createBufferSource();
@@ -925,7 +925,7 @@ const curlShader = compileShader(gl.FRAGMENT_SHADER, `
         float B = texture2D(uVelocity, vB).x;
         float vorticity = R - L - T + B;
         if (flag == 3.0){
-            gl_FragColor = vec4(2.0 * vorticity, 0.0, 0.0, 1.0);
+            gl_FragColor = vec4(2.5 * vorticity, 0.0, 0.0, 1.0);
         }
         else if(flag == 4.0){
             gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
