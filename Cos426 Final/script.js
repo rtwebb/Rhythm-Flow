@@ -140,6 +140,7 @@ let config = {
     MUSIC_PLAY: null,
     MUSIC_PAUSE: null,
     WACKY: true,
+    WACKY_FLAG: 0.0,
     WACKY_DISSIPATION: 'Regular',
     WACKY_VORTICITY: 'Regular',
     WACKY_CURL: 'Regular',
@@ -150,8 +151,8 @@ let config = {
 }
 config.MUSIC_PLAY = function() {playMp3(); config.MUSIC = true;};
 config.MUSIC_PAUSE = function() {pauseMp3(); config.MUSIC = false;};
-config.WACKY_STROBELIGHTS = function() {strobeLights(); config.WACKY_STROBELIGHTS = true; config.VELOCITY_DISSIPATION = 1.05;};
-config.WACKY_STROBEMARKER = function() {strobeMarker(); config.WACKY_STROBEMARKER = true; config.VELOCITY_DISSIPATION = .92;};
+config.WACKY_STROBELIGHTS = function() {strobeLights();};
+config.WACKY_STROBEMARKER = function() {strobeMarker(); config.VELOCITY_DISSIPATION = .92;};
 
 function pointerPrototype () {
     this.id = -1;
@@ -803,6 +804,7 @@ const advectionShader = compileShader(gl.FRAGMENT_SHADER, `
     uniform vec2 dyeTexelSize;
     uniform float dt;
     uniform float dissipation;
+    uniform float flag;
 
     vec4 bilerp (sampler2D sam, vec2 uv, vec2 tsize) {
         vec2 st = uv / tsize - 0.5;
@@ -826,8 +828,19 @@ const advectionShader = compileShader(gl.FRAGMENT_SHADER, `
         vec2 coord = vUv - dt * texture2D(uVelocity, vUv).xy * texelSize;
         vec4 result = texture2D(uSource, coord);
     #endif
-        float decay = 1.0 + dissipation * dt;
-        gl_FragColor = result / decay * -dissipation;
+        if (flag == 5.0){
+            float decay = 1.0 + dissipation * dt;
+            gl_FragColor = result / decay * -dissipation;
+        }
+        else if(flag == 6.0){
+            float decay = 1.0 + dissipation * dt;
+            gl_FragColor = result / decay * dissipation;
+        }
+        else{
+            float decay = 1.0 + dissipation * dt;
+            gl_FragColor = result / decay;
+        }
+
     }`,
     ext.supportLinearFiltering ? null : ['MANUAL_FILTERING']
 );
@@ -1342,6 +1355,7 @@ function step (dt) {
     gl.uniform1i(advectionProgram.uniforms.uSource, velocityId);
     gl.uniform1f(advectionProgram.uniforms.dt, dt);
     gl.uniform1f(advectionProgram.uniforms.dissipation, config.VELOCITY_DISSIPATION);
+    gl.uniform1f(advectionProgram.uniforms.flag, config.WACKY_FLAG);
     blit(velocity.write);
     velocity.swap();
 
@@ -1522,13 +1536,20 @@ function applyMusic(){
 
 }
 
-// function strobeLights(){
-//     advection shader
-// }
+function strobeLights(){
+    //advection shader
 
-// function strobeMarker(){
+    console.log("in strobe lights")
+    config.WACKY_FLAG = 5.0;
+    config.VELOCITY_DISSIPATION = 1.05;
     
-// }
+}
+
+function strobeMarker(){
+    console.log("in strobe lights")
+    config.WACKY_FLAG = 6.0;
+    config.VELOCITY_DISSIPATION = .92;
+}
 
 function applyWacky(){
 
