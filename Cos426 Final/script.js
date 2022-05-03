@@ -146,13 +146,15 @@ let config = {
     WACKY_CURL: 'Regular',
     WACKY_STROBELIGHTS: null,
     WACKY_STROBEMARKER: null,
+    WACKY_STROBEOFF: null,
     WACKY_SPORADICADVECT: advectObj
 
 }
 config.MUSIC_PLAY = function() {playMp3(); config.MUSIC = true;};
 config.MUSIC_PAUSE = function() {pauseMp3(); config.MUSIC = false;};
 config.WACKY_STROBELIGHTS = function() {strobeLights();};
-config.WACKY_STROBEMARKER = function() {strobeMarker(); config.VELOCITY_DISSIPATION = .92;};
+config.WACKY_STROBEMARKER = function() {strobeMarker();};
+config.WACKY_STROBEOFF = function () {strobeOff();};
 
 function pointerPrototype () {
     this.id = -1;
@@ -305,6 +307,7 @@ function startGUI () {
     wackyFolder.add(config, 'WACKY_CURL', ['Regular', 'Fast', 'Slow', 'None']).name('curl');
     wackyFolder.add(config, 'WACKY_STROBELIGHTS').name('strobe lights').onFinishChange(updateKeywords);
     wackyFolder.add(config, 'WACKY_STROBEMARKER').name('strobe marker').onFinishChange(updateKeywords);
+    wackyFolder.add(config, 'WACKY_STROBEOFF').name('turn strobe off').onFinishChange(updateKeywords);
     wackyFolder.add(config, 'WACKY_SPORADICADVECT').name('sporadic advect').onFinishChange(updateKeywords);
 
     // enables person to take a screenshot - could delete
@@ -1537,18 +1540,18 @@ function applyMusic(){
 }
 
 function strobeLights(){
-    //advection shader
-
-    console.log("in strobe lights")
     config.WACKY_FLAG = 5.0;
     config.VELOCITY_DISSIPATION = 1.05;
-    
+    multipleSplats(30);
 }
 
 function strobeMarker(){
-    console.log("in strobe lights")
     config.WACKY_FLAG = 6.0;
     config.VELOCITY_DISSIPATION = .92;
+}
+
+function strobeOff(){
+    config.WACKY_FLAG = 0.0 ;
 }
 
 function applyWacky(){
