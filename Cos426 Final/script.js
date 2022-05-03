@@ -126,6 +126,7 @@ let config = {
     WACKY_VORTICITY_FLAG: 0.0,
     WACKY_VORTICITY: 'Regular',
     WACKY_CURL: 'Regular',
+    WACKY_CURL_FLAG: 0.0,
     WACKY_STROBEOFF: null,
     WACKY_MIRRORADVECT: false
 }
@@ -281,7 +282,7 @@ function startGUI () {
     let wackyFolder = gui.addFolder('Wacky');
     wackyFolder.add(config, 'WACKY_DISSIPATION', ['Regular', 'Fast', 'Slow', 'None', 'Strobe', 'Marker'] ).name('dissipation');
     wackyFolder.add(config, 'WACKY_VORTICITY', ['Regular', 'High', 'None']).name('vorticity');
-    wackyFolder.add(config, 'WACKY_CURL', ['Regular', 'Fast', 'Slow', 'None']).name('curl');
+    wackyFolder.add(config, 'WACKY_CURL', ['Tight', 'Regular', 'Loose']).name('curl');
     wackyFolder.add(config, 'WACKY_MIRRORADVECT').name('mirror advect').onFinishChange(updateKeywords);
 
     // enables person to take a screenshot - could delete
@@ -929,6 +930,7 @@ const vorticityShader = compileShader(gl.FRAGMENT_SHADER, `
     uniform sampler2D uCurl;
     uniform float curl;
     uniform float dt;
+    uniform float flag;
 
     void main () {
         float L = texture2D(uCurl, vL).x;
@@ -939,7 +941,14 @@ const vorticityShader = compileShader(gl.FRAGMENT_SHADER, `
 
         vec2 force = 0.5 * vec2(abs(T) - abs(B), abs(R) - abs(L));
         force /= length(force) + 0.0001;
-        force *= curl * C;
+        float factor = 0.0;
+
+        if(flag == 1.0){
+            factor = 70.0;
+        }else if (flag == -1.0){
+            factor = -30.0;
+        }
+        force *= (curl + factor) * C;
         force.y *= -1.0;
 
         vec2 velocity = texture2D(uVelocity, vUv).xy;
@@ -1335,6 +1344,7 @@ function step (dt) {
     gl.uniform1i(vorticityProgram.uniforms.uCurl, curl.attach(1));
     gl.uniform1f(vorticityProgram.uniforms.curl, config.CURL);
     gl.uniform1f(vorticityProgram.uniforms.dt, dt);
+    gl.uniform1f(vorticityProgram.uniforms.flag, config.WACKY_CURL_FLAG);
     blit(velocity.write);
     velocity.swap();
 
@@ -1629,11 +1639,26 @@ function wackyVorticity(){
     }
 }
 
+function wackyCurl(){
+    var selected = config.WACKY_CURL;
+    if (selected == 'Tight' ){
+        config.WACKY_CURL_FLAG = 1.0;
+    }else if(selected == 'Regular'){
+        config.WACKY_CURL_FLAG = 0.0;
+    }else if(selected == 'Loose'){
+        config.WACKY_CURL_FLAG = -1.0;
+        
+    }
+
+}
+
 function applyWacky(){
 
     // function for dissipation
     wackyDissipation();
     wackyVorticity();
+    wackyCurl();
+
 }
 
 // // HELPER FOR WACKY COLLISION EFFECT 
