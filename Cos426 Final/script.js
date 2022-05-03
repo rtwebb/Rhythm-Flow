@@ -144,17 +144,13 @@ let config = {
     WACKY_DISSIPATION: 'Regular',
     WACKY_VORTICITY: 'Regular',
     WACKY_CURL: 'Regular',
-    WACKY_STROBELIGHTS: null,
-    WACKY_STROBEMARKER: null,
     WACKY_STROBEOFF: null,
     WACKY_SPORADICADVECT: advectObj
 
 }
 config.MUSIC_PLAY = function() {playMp3(); config.MUSIC = true;};
 config.MUSIC_PAUSE = function() {pauseMp3(); config.MUSIC = false;};
-config.WACKY_STROBELIGHTS = function() {strobeLights();};
-config.WACKY_STROBEMARKER = function() {strobeMarker();};
-config.WACKY_STROBEOFF = function () {strobeOff();};
+
 
 function pointerPrototype () {
     this.id = -1;
@@ -302,12 +298,9 @@ function startGUI () {
 
     // wacky changes 
     let wackyFolder = gui.addFolder('Wacky');
-    wackyFolder.add(config, 'WACKY_DISSIPATION', ['Regular', 'Fast', 'Slow', 'None'] ).name('dissipation');
+    wackyFolder.add(config, 'WACKY_DISSIPATION', ['Regular', 'Fast', 'Slow', 'None', 'Strobe', 'Marker'] ).name('dissipation');
     wackyFolder.add(config, 'WACKY_VORTICITY', ['Regular', 'Fast', 'Slow', 'None']).name('vorticity');
     wackyFolder.add(config, 'WACKY_CURL', ['Regular', 'Fast', 'Slow', 'None']).name('curl');
-    wackyFolder.add(config, 'WACKY_STROBELIGHTS').name('strobe lights').onFinishChange(updateKeywords);
-    wackyFolder.add(config, 'WACKY_STROBEMARKER').name('strobe marker').onFinishChange(updateKeywords);
-    wackyFolder.add(config, 'WACKY_STROBEOFF').name('turn strobe off').onFinishChange(updateKeywords);
     wackyFolder.add(config, 'WACKY_SPORADICADVECT').name('sporadic advect').onFinishChange(updateKeywords);
 
     // enables person to take a screenshot - could delete
@@ -838,6 +831,17 @@ const advectionShader = compileShader(gl.FRAGMENT_SHADER, `
         else if(flag == 6.0){
             float decay = 1.0 + dissipation * dt;
             gl_FragColor = result / decay * dissipation;
+        }
+        else if(flag == 7.0){
+            float decay = 1.0 + dissipation * 8.0 * dt;
+            gl_FragColor = result / decay;
+        }
+        else if(flag == 8.0){
+            float decay = 1.0 + dissipation / 3.0 * dt;
+            gl_FragColor = result / decay;
+        }
+        else if(flag == 9.0){
+            gl_FragColor = result;
         }
         else{
             float decay = 1.0 + dissipation * dt;
@@ -1507,6 +1511,11 @@ function blur (target, temp, iterations) {
 //////////////////////////////////////////////////////////
 
 
+/*
+-----------------------------------------------------------------
+MUSIC FUNCTIONS
+-----------------------------------------------------------------
+*/
 function playMp3() { 
     let audioContainer = document.getElementById("demo"); 
     audioContainer.play(); 
@@ -1539,23 +1548,45 @@ function applyMusic(){
 
 }
 
-function strobeLights(){
-    config.WACKY_FLAG = 5.0;
-    config.VELOCITY_DISSIPATION = 1.05;
-    multipleSplats(30);
-}
+/*
+-----------------------------------------------------------------
+WACKY FUNCTIONS
+-----------------------------------------------------------------
+*/
+// Implementing wacky dissipation functions
+function wackyDissipation(){
+    let val = config.WACKY_DISSIPATION;
+    console.log(val)  
+    if(val === 'Strobe'){ // .5 vs. 1.05
+        config.WACKY_FLAG = 5.0;
+        config.VELOCITY_DISSIPATION = .5;
+        multipleSplats(1);
+    }
+    else if(val === 'Marker'){
+        config.WACKY_FLAG = 6.0;
+        config.VELOCITY_DISSIPATION = .92;
+    } 
+    else if(val === 'Fast'){
+        config.WACKY_FLAG = 7.0;
+        multipleSplats(1);
+    }
+    else if (val === 'Slow'){
+        config.WACKY_FLAG = 8.0;
+    }
+    else if(val === 'None'){
+        config.WACKY_FLAG = 9.0;
+    }
+    else{
+        config.WACKY_FLAG = 0.0
+    }
 
-function strobeMarker(){
-    config.WACKY_FLAG = 6.0;
-    config.VELOCITY_DISSIPATION = .92;
-}
 
-function strobeOff(){
-    config.WACKY_FLAG = 0.0 ;
 }
 
 function applyWacky(){
 
+    // function for dissipation
+    wackyDissipation()
 }
 
 function splatPointer (pointer) {
