@@ -298,7 +298,7 @@ function startGUI () {
     // wacky changes 
     let wackyFolder = gui.addFolder('Wacky');
     wackyFolder.add(config, 'WACKY_DISSIPATION', ['Regular', 'Fast', 'Slow', 'None', 'Strobe', 'Marker'] ).name('dissipation');
-    wackyFolder.add(config, 'WACKY_VORTICITY', ['Regular', 'High', 'Low', 'None']).name('vorticity');
+    wackyFolder.add(config, 'WACKY_VORTICITY', ['Regular', 'High', 'None']).name('vorticity');
     wackyFolder.add(config, 'WACKY_CURL', ['Regular', 'Fast', 'Slow', 'None']).name('curl');
     wackyFolder.add(config, 'WACKY_MIRRORADVECT').name('mirror advect').onFinishChange(updateKeywords);
 
@@ -912,6 +912,7 @@ const curlShader = compileShader(gl.FRAGMENT_SHADER, `
     varying highp vec2 vT;
     varying highp vec2 vB;
     uniform sampler2D uVelocity;
+    uniform float flag;
 
     void main () {
         float L = texture2D(uVelocity, vL).y;
@@ -919,7 +920,16 @@ const curlShader = compileShader(gl.FRAGMENT_SHADER, `
         float T = texture2D(uVelocity, vT).x;
         float B = texture2D(uVelocity, vB).x;
         float vorticity = R - L - T + B;
-        gl_FragColor = vec4(0.5 * vorticity, 0.0, 0.0, 1.0);
+        if (flag == 3.0){
+            gl_FragColor = vec4(2.0 * vorticity, 0.0, 0.0, 1.0);
+        }
+        else if(flag == 4.0){
+            gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+        }
+        else{
+            gl_FragColor = vec4(0.5 * vorticity, 0.0, 0.0, 1.0);
+        }
+        
     }
 `);
 
@@ -1334,6 +1344,7 @@ function step (dt) {
     curlProgram.bind();
     gl.uniform2f(curlProgram.uniforms.texelSize, velocity.texelSizeX, velocity.texelSizeY);
     gl.uniform1i(curlProgram.uniforms.uVelocity, velocity.read.attach(0));
+    gl.uniform1f(curlProgram.uniforms.flag, config.WACKY_VORTICITY_FLAG);
     blit(curl);
 
     vorticityProgram.bind();
@@ -1381,7 +1392,7 @@ function step (dt) {
     gl.uniform1i(advectionProgram.uniforms.uSource, velocityId);
     gl.uniform1f(advectionProgram.uniforms.dt, dt);
     gl.uniform1f(advectionProgram.uniforms.dissipation, config.VELOCITY_DISSIPATION);
-    gl.uniform1f(advectionProgram.uniforms.flag, config.WACKY_FLAG);
+    gl.uniform1f(advectionProgram.uniforms.flag, config.WACKY_DISSIPATION_FLAG);
     blit(velocity.write);
     velocity.swap();
 
@@ -1600,18 +1611,16 @@ function wackyDissipation(){
 
 // implementing wacky vorticity
 function wackyVorticity(){
-    let val = config.WACKY_DISSIPATION; 
+    let val = config.WACKY_VORTICITY; 
+    console.log(val)
     if(val === 'High'){
-        config.WACKY_VORTICITY_FLAG = 1.1
-    }
-    else if(val === 'Low'){
-
+        config.WACKY_VORTICITY_FLAG = 3.0;
     }
     else if(val === 'None'){
-
+        config.WACKY_VORTICITY_FLAG = 4.0;
     }
     else{
-
+        config.WACKY_VORTICITY_FLAG = 0.0;
     }
 }
 
