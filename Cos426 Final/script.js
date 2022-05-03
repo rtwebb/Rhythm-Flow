@@ -109,7 +109,6 @@ Simulation section
 
 const canvas = document.getElementsByTagName('canvas')[0];
 resizeCanvas();
-var advectObj = function() {sporadicAdvect()};
 let config = {
     SIM_RESOLUTION: 128,
     DYE_RESOLUTION: 1024,
@@ -145,8 +144,7 @@ let config = {
     WACKY_VORTICITY: 'Regular',
     WACKY_CURL: 'Regular',
     WACKY_STROBEOFF: null,
-    WACKY_SPORADICADVECT: advectObj
-
+    WACKY_MIRRORADVECT: false
 }
 config.MUSIC_PLAY = function() {playMp3(); config.MUSIC = true;};
 config.MUSIC_PAUSE = function() {pauseMp3(); config.MUSIC = false;};
@@ -301,7 +299,7 @@ function startGUI () {
     wackyFolder.add(config, 'WACKY_DISSIPATION', ['Regular', 'Fast', 'Slow', 'None', 'Strobe', 'Marker'] ).name('dissipation');
     wackyFolder.add(config, 'WACKY_VORTICITY', ['Regular', 'Fast', 'Slow', 'None']).name('vorticity');
     wackyFolder.add(config, 'WACKY_CURL', ['Regular', 'Fast', 'Slow', 'None']).name('curl');
-    wackyFolder.add(config, 'WACKY_SPORADICADVECT').name('sporadic advect').onFinishChange(updateKeywords);
+    wackyFolder.add(config, 'WACKY_MIRRORADVECT').name('mirror advect').onFinishChange(updateKeywords);
 
     // enables person to take a screenshot - could delete
     let captureFolder = gui.addFolder('Capture');
@@ -801,6 +799,7 @@ const advectionShader = compileShader(gl.FRAGMENT_SHADER, `
     uniform float dt;
     uniform float dissipation;
     uniform float flag;
+    uniform bool mirrorAdvect;
 
     vec4 bilerp (sampler2D sam, vec2 uv, vec2 tsize) {
         vec2 st = uv / tsize - 0.5;
@@ -821,8 +820,27 @@ const advectionShader = compileShader(gl.FRAGMENT_SHADER, `
         vec2 coord = vUv - dt * bilerp(uVelocity, vUv, texelSize).xy * texelSize;
         vec4 result = bilerp(uSource, coord, dyeTexelSize);
     #else
-        vec2 coord = vUv - dt * texture2D(uVelocity, vUv).xy * texelSize;
-        vec4 result = texture2D(uSource, coord);
+        vec4 result;
+        if (mirrorAdvect) {
+            if (vUv.x > vUv.y) {
+                vec2 coord = vUv - dt * texture2D(uVelocity, vUv).xy * texelSize;
+                result = texture2D(uSource, coord);
+                if (result.x < 0.05 && result.y < 0.05 && result.z < 0.05) {
+                    vec2 coord = vec2(vUv.y, vUv.x) - dt * texture2D(uVelocity, vUv).xy * texelSize;
+                    result = texture2D(uSource, coord);
+                }
+            } else {
+                vec2 coord = vec2(vUv.y, vUv.x) - dt * texture2D(uVelocity, vUv).xy * texelSize;
+                result = texture2D(uSource, coord);
+                if (result.x < 0.05 && result.y < 0.05 && result.z < 0.05) {
+                    vec2 coord = vUv - dt * texture2D(uVelocity, vUv).xy * texelSize;
+                    result = texture2D(uSource, coord);
+                }
+            }
+        } else {
+            vec2 coord = vUv - dt * texture2D(uVelocity, vUv).xy * texelSize;
+            result = texture2D(uSource, coord);
+        }
     #endif
         if (flag == 5.0){
             float decay = 1.0 + dissipation * dt;
@@ -1371,6 +1389,7 @@ function step (dt) {
     gl.uniform1i(advectionProgram.uniforms.uVelocity, velocity.read.attach(0));
     gl.uniform1i(advectionProgram.uniforms.uSource, dye.read.attach(1));
     gl.uniform1f(advectionProgram.uniforms.dissipation, config.DENSITY_DISSIPATION);
+    gl.uniform1f(advectionProgram.uniforms.mirrorAdvect, config.WACKY_MIRRORADVECT);
     blit(dye.write);
     dye.swap();
 }
