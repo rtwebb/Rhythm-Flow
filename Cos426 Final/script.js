@@ -32,18 +32,32 @@ SOFTWARE.
 FREQUENCY ANALYSIS
 -----------------------------------------------------------------
 */
-var Frequency = Frequency || {};
-var audioCtx;
-var source;
-var analyser;
-const audio = new Audio();
+
+// var audioCtx;
+// var source;
+
+// var Frequency = Frequency || {};
+// const audioCtx = new AudioContext();
+// var analyser = audioCtx.createAnalyser();
+// analyser.fftSize = 2048;
+// var audio;
+
+// fetch("./Songs/Waterfalls.mp3")
+//     .then(data => data.arrayBuffer())
+//     .then(arrayBuffer => audioCtx.decodeAudioData(arrayBuffer))
+//     .then(decodedAudio => {
+//         audio = decodedAudio
+//     });
 
 
 // https://medium.com/swlh/building-a-audio-visualizer-with-javascript-324b8d420e7
-function frequencyAnalyzer(){
+// function frequencyAnalyzer(){
 
+//     Frequency.data = new Uint8Array(analyser.frequencyBinCount);
+//     analyser.getByteFrequencyData(Frequency.data);
+//     //console.log(Frequency.data);
 
-}
+// }
 
 /*
 -----------------------------------------------------------------
@@ -268,7 +282,7 @@ function startGUI () {
     bloomFolder.add(config, 'BLOOM_INTENSITY', 0.1, 2.0).name('intensity');
     bloomFolder.add(config, 'BLOOM_THRESHOLD', 0.0, 1.0).name('threshold');
 
-    // effects brightness of page 
+    // effects brightness of page
     let sunraysFolder = gui.addFolder('Sunrays');
     sunraysFolder.add(config, 'SUNRAYS').name('enabled').onFinishChange(updateKeywords);
     sunraysFolder.add(config, 'SUNRAYS_WEIGHT', 0.3, 1.0).name('weight');
@@ -279,7 +293,7 @@ function startGUI () {
     musicFolder.add(config, 'MUSIC_PAUSE').name('pause').onFinishChange(updateKeywords);
 
 
-    // wacky changes 
+    // wacky changes
     let wackyFolder = gui.addFolder('Wacky');
     wackyFolder.add(config, 'WACKY_DISSIPATION', ['Regular', 'Fast', 'Slow', 'None', 'Strobe', 'Marker'] ).name('dissipation');
     //wackyFolder.add(config, 'WACKY_VORTICITY', ['Regular', 'High', 'None']).name('vorticity');
@@ -866,11 +880,11 @@ const divergenceShader = compileShader(gl.FRAGMENT_SHADER, `
     varying highp vec2 vR;
     varying highp vec2 vT;
     varying highp vec2 vB;
-    uniform sampler2D uVelocity; 
+    uniform sampler2D uVelocity;
 
     void main () {
         // GRABBING THE VELOCITY OF THE NEARBY PIXELS
-        float L = texture2D(uVelocity, vL).x; 
+        float L = texture2D(uVelocity, vL).x;
         float R = texture2D(uVelocity, vR).x;
         float T = texture2D(uVelocity, vT).y;
         float B = texture2D(uVelocity, vB).y;
@@ -886,7 +900,7 @@ const divergenceShader = compileShader(gl.FRAGMENT_SHADER, `
     }
 `);
 
-// Circular motion 
+// Circular motion
 const curlShader = compileShader(gl.FRAGMENT_SHADER, `
     precision mediump float;
     precision mediump sampler2D;
@@ -905,7 +919,7 @@ const curlShader = compileShader(gl.FRAGMENT_SHADER, `
         float B = texture2D(uVelocity, vB).x;
         float vorticity = R - L - T + B;
         gl_FragColor = vec4(0.5 * vorticity, 0.0, 0.0, 1.0);
-        
+
     }
 `);
 
@@ -1531,51 +1545,75 @@ function blur (target, temp, iterations) {
 MUSIC FUNCTIONS
 -----------------------------------------------------------------
 */
-function playMp3() { 
+function playBack() {
     // play audio
-    let audioContainer = document.getElementById("demo"); 
-    audioContainer.play(); 
+    // let audioContainer = document.getElementById("demo");
+    // audioContainer.play();
 
-    Frequency = Frequency || {};
-    audioCtx = new AudioContext();
+   // Frequency = Frequency || {};
+//    const playSound = audioCtx.createBufferSource();
+//    playSound.buffer = audio;
+//    playSound.connect(audioCtx.destination);
+//    if (config.MUSIC === true){
+//     playSound.start(audioCtx.currentTime);
+//    }
+//    else{
+//     playSound.start(audioCtx.currentTime);
+//     playSound.stop(audioCtx.currentTime + 1);
+//    }
+   //playSound.stop(audioCtx.currentTime + 1);
+
+
 
     // pulling audio
-    audio.src = document.getElementById("water").src;
-    audio.load();
+    // audio.src = document.getElementById("water").src;
+    // audio.load();
 
     // creating source
-    source = audioCtx.createMediaElementSource(audio);
+    // source = audioCtx.createMediaElementSource(audio);
 
-    // create audio analyzer
-    analyser = audioCtx.createAnalyser();
-    analyser.fftSize = 64;
-    Frequency.data = new Uint8Array(analyser.frequencyBinCount);
-    setInterval(function(){
-        analyser.getByteFrequencyData(Frequency.data);
-        console.log(Frequency.data);
-    })
-    
-    
-    // set up audio node connection
-    source.connect(analyser);
-  } 
-  
-function pauseMp3() { 
-    let audioContainer = document.getElementById("demo"); 
-    audioContainer.pause(); 
-} 
+    // // create audio analyzer
+    // analyser = audioCtx.createAnalyser();
+    // analyser.fftSize = 64;
+    // Frequency.data = new Uint8Array(analyser.frequencyBinCount);
+    // setInterval(function(){
+    //     analyser.getByteFrequencyData(Frequency.data);
+    //     console.log(Frequency.data);
+    // })
+
+
+
+    // // set up audio node connection
+    // source.connect(analyser);
+  }
+
+function playMp3() {
+    let audioContainer = document.getElementById("demo");
+    audioContainer.play();
+
+    // config.MUSIC = true;
+    // playBack();
+}
+
+function pauseMp3() {
+    let audioContainer = document.getElementById("demo");
+    audioContainer.pause();
+
+    // config.MUSIC = false;
+    // playBack();
+}
 
 // function that controls music function
 function applyMusic(){
     if (config.MUSIC) {
         // call frequency analysis
-        frequencyAnalyzer();
-        // call volume analysis 
+        //frequencyAnalyzer();
+        // call volume analysis
 
-        // call tempo analysis 
+        // call tempo analysis
         if (Tempo.isSet) {
             const current = new Date().getTime();
-            // if last splat was more than the amount of time between each measure, 
+            // if last splat was more than the amount of time between each measure,
             // splat again
             if ((current - Tempo.lastSplat) / 1000 > (60 / Tempo.bpm) * 4) {
                 multipleSplats(1);
@@ -1592,7 +1630,7 @@ WACKY FUNCTIONS
 */
 // Implementing wacky dissipation functions
 function wackyDissipation(){
-    let val = config.WACKY_DISSIPATION; 
+    let val = config.WACKY_DISSIPATION;
     if(val === 'Strobe'){ // .5 vs. 1.05
         config.WACKY_DISSIPATION_FLAG = 5.0;
         config.VELOCITY_DISSIPATION = .5;
@@ -1601,7 +1639,7 @@ function wackyDissipation(){
     else if(val === 'Marker'){
         config.WACKY_DISSIPATION_FLAG = 6.0;
         config.VELOCITY_DISSIPATION = .92;
-    } 
+    }
     else if(val === 'Fast'){
         config.WACKY_DISSIPATION_FLAG = 7.0;
         multipleSplats(1);
@@ -1626,12 +1664,12 @@ function wackyCurl(){
         config.WACKY_CURL_FLAG = 0.0;
     }else if(selected == 'Loose'){
         config.WACKY_CURL_FLAG = -1.0;
-        
+
     }
 
 }
 
-// // HELPER FOR WACKY COLLISION EFFECT 
+// // HELPER FOR WACKY COLLISION EFFECT
 function mirror(coord) {
     return 0.5 - (coord - 0.5);
 }
@@ -1646,8 +1684,8 @@ function wackyMotion(){
     else{
         config.WACKY_MOTION_FLAG = 0.0;
     }
-    
-   
+
+
 }
 
 function applyWacky(){
@@ -1663,7 +1701,7 @@ function applyWacky(){
 function splatPointer (pointer) {
     let dx = pointer.deltaX * config.SPLAT_FORCE;
     let dy = pointer.deltaY * config.SPLAT_FORCE;
-    // NOTES: texcoords are from 0 to 1, 
+    // NOTES: texcoords are from 0 to 1,
     // I think deltaX is the displacement of the cursor
     splat(pointer.texcoordX, pointer.texcoordY, dx, dy, pointer.color);
     if (config.WACKY_MOTION_FLAG === 1.0){
@@ -1672,8 +1710,8 @@ function splatPointer (pointer) {
     else if(config.WACKY_MOTION_FLAG === 2.0){
         splat(mirror(pointer.texcoordY), mirror(pointer.texcoordX), mirror(dy), mirror(dx), pointer.color);
     }
-        
-    
+
+
 }
 
 function multipleSplats (amount) {
