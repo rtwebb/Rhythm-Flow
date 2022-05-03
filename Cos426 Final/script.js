@@ -123,12 +123,12 @@ let config = {
     WACKY: true,
     WACKY_DISSIPATION_FLAG: 0.0,
     WACKY_DISSIPATION: 'Regular',
-    WACKY_VORTICITY_FLAG: 0.0,
-    WACKY_VORTICITY: 'Regular',
+    //WACKY_VORTICITY_FLAG: 0.0,
+    //WACKY_VORTICITY: 'Regular',
     WACKY_CURL: 'Regular',
     WACKY_CURL_FLAG: 0.0,
     WACKY_MOTION: 'Regular',
-    WACKY_MOTION_FLAG: false,
+    WACKY_MOTION_FLAG: 0.0,
     WACKY_MIRRORADVECT: false
 }
 config.MUSIC_PLAY = function() {playMp3(); config.MUSIC = true;};
@@ -282,9 +282,9 @@ function startGUI () {
     // wacky changes 
     let wackyFolder = gui.addFolder('Wacky');
     wackyFolder.add(config, 'WACKY_DISSIPATION', ['Regular', 'Fast', 'Slow', 'None', 'Strobe', 'Marker'] ).name('dissipation');
-    wackyFolder.add(config, 'WACKY_VORTICITY', ['Regular', 'High', 'None']).name('vorticity');
-    wackyFolder.add(config, 'WACKY_CURL', ['Tight', 'Regular', 'Loose']).name('curl');
-    wackyFolder.add(config, 'WACKY_MOTION', ['Regular', 'Opposite']).name('motion');
+    //wackyFolder.add(config, 'WACKY_VORTICITY', ['Regular', 'High', 'None']).name('vorticity');
+    wackyFolder.add(config, 'WACKY_CURL', ['Regular', 'Tight', 'Loose']).name('curl');
+    wackyFolder.add(config, 'WACKY_MOTION', ['Regular', 'Opposite', 'Collision']).name('motion');
     wackyFolder.add(config, 'WACKY_MIRRORADVECT').name('mirror advect').onFinishChange(updateKeywords);
 
     // enables person to take a screenshot - could delete
@@ -897,7 +897,6 @@ const curlShader = compileShader(gl.FRAGMENT_SHADER, `
     varying highp vec2 vT;
     varying highp vec2 vB;
     uniform sampler2D uVelocity;
-    uniform float flag;
 
     void main () {
         float L = texture2D(uVelocity, vL).y;
@@ -905,15 +904,7 @@ const curlShader = compileShader(gl.FRAGMENT_SHADER, `
         float T = texture2D(uVelocity, vT).x;
         float B = texture2D(uVelocity, vB).x;
         float vorticity = R - L - T + B;
-        if (flag == 3.0){
-            gl_FragColor = vec4(2.5 * vorticity, 0.0, 0.0, 1.0);
-        }
-        else if(flag == 4.0){
-            gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
-        }
-        else{
-            gl_FragColor = vec4(0.5 * vorticity, 0.0, 0.0, 1.0);
-        }
+        gl_FragColor = vec4(0.5 * vorticity, 0.0, 0.0, 1.0);
         
     }
 `);
@@ -946,7 +937,7 @@ const vorticityShader = compileShader(gl.FRAGMENT_SHADER, `
         float factor = 0.0;
 
         if(flag == 1.0){
-            factor = 70.0;
+            factor = 100.0;
         }else if (flag == -1.0){
             factor = -30.0;
         }
@@ -1337,7 +1328,6 @@ function step (dt) {
     curlProgram.bind();
     gl.uniform2f(curlProgram.uniforms.texelSize, velocity.texelSizeX, velocity.texelSizeY);
     gl.uniform1i(curlProgram.uniforms.uVelocity, velocity.read.attach(0));
-    gl.uniform1f(curlProgram.uniforms.flag, config.WACKY_VORTICITY_FLAG);
     blit(curl);
 
     vorticityProgram.bind();
@@ -1627,20 +1617,7 @@ function wackyDissipation(){
     }
 }
 
-// implementing wacky vorticity
-function wackyVorticity(){
-    let val = config.WACKY_VORTICITY; 
-    if(val === 'High'){
-        config.WACKY_VORTICITY_FLAG = 3.0;
-    }
-    else if(val === 'None'){
-        config.WACKY_VORTICITY_FLAG = 4.0;
-    }
-    else{
-        config.WACKY_VORTICITY_FLAG = 0.0;
-    }
-}
-
+// implementing wacky curl
 function wackyCurl(){
     var selected = config.WACKY_CURL;
     if (selected == 'Tight' ){
@@ -1661,10 +1638,13 @@ function mirror(coord) {
 
 function wackyMotion(){
     if (config.WACKY_MOTION === 'Opposite'){
-        config.WACKY_MOTION_FLAG = true;
+        config.WACKY_MOTION_FLAG = 1.0;
+    }
+    else if(config.WACKY_MOTION === 'Collision'){
+        config.WACKY_MOTION_FLAG = 2.0;
     }
     else{
-        config.WACKY_MOTION_FLAG = false;
+        config.WACKY_MOTION_FLAG = 0.0;
     }
     
    
@@ -1674,7 +1654,6 @@ function applyWacky(){
 
     // function for dissipation
     wackyDissipation();
-    wackyVorticity();
     wackyCurl();
     wackyMotion();
 
@@ -1687,11 +1666,14 @@ function splatPointer (pointer) {
     // NOTES: texcoords are from 0 to 1, 
     // I think deltaX is the displacement of the cursor
     splat(pointer.texcoordX, pointer.texcoordY, dx, dy, pointer.color);
-    if (config.WACKY_MOTION_FLAG === true){
+    if (config.WACKY_MOTION_FLAG === 1.0){
         splat(mirror(pointer.texcoordX), mirror(pointer.texcoordY), mirror(dx), mirror(dy), pointer.color);
     }
+    else if(config.WACKY_MOTION_FLAG === 2.0){
+        splat(mirror(pointer.texcoordY), mirror(pointer.texcoordX), mirror(dy), mirror(dx), pointer.color);
+    }
         
-    //splat(mirror(pointer.texcoordY), mirror(pointer.texcoordX), mirror(dy), mirror(dx), pointer.color);
+    
 }
 
 function multipleSplats (amount) {
