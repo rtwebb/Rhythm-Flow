@@ -139,8 +139,9 @@ let config = {
     MUSIC_PLAY: null,
     MUSIC_PAUSE: null,
     WACKY: true,
-    WACKY_FLAG: 0.0,
+    WACKY_DISSIPATION_FLAG: 0.0,
     WACKY_DISSIPATION: 'Regular',
+    WACKY_VORTICITY_FLAG: 0.0,
     WACKY_VORTICITY: 'Regular',
     WACKY_CURL: 'Regular',
     WACKY_STROBEOFF: null,
@@ -297,7 +298,7 @@ function startGUI () {
     // wacky changes 
     let wackyFolder = gui.addFolder('Wacky');
     wackyFolder.add(config, 'WACKY_DISSIPATION', ['Regular', 'Fast', 'Slow', 'None', 'Strobe', 'Marker'] ).name('dissipation');
-    wackyFolder.add(config, 'WACKY_VORTICITY', ['Regular', 'Fast', 'Slow', 'None']).name('vorticity');
+    wackyFolder.add(config, 'WACKY_VORTICITY', ['Regular', 'High', 'Low', 'None']).name('vorticity');
     wackyFolder.add(config, 'WACKY_CURL', ['Regular', 'Fast', 'Slow', 'None']).name('curl');
     wackyFolder.add(config, 'WACKY_MIRRORADVECT').name('mirror advect').onFinishChange(updateKeywords);
 
@@ -1552,7 +1553,6 @@ function applyMusic(){
         frequencyAnalyzer();
         // call volume analysis 
 
-
         // call tempo analysis 
         if (Tempo.isSet) {
             const current = new Date().getTime();
@@ -1564,7 +1564,6 @@ function applyMusic(){
             }
         }
     }
-
 }
 
 /*
@@ -1574,38 +1573,53 @@ WACKY FUNCTIONS
 */
 // Implementing wacky dissipation functions
 function wackyDissipation(){
-    let val = config.WACKY_DISSIPATION;
-    console.log(val)  
+    let val = config.WACKY_DISSIPATION; 
     if(val === 'Strobe'){ // .5 vs. 1.05
-        config.WACKY_FLAG = 5.0;
+        config.WACKY_DISSIPATION_FLAG = 5.0;
         config.VELOCITY_DISSIPATION = .5;
         multipleSplats(1);
     }
     else if(val === 'Marker'){
-        config.WACKY_FLAG = 6.0;
+        config.WACKY_DISSIPATION_FLAG = 6.0;
         config.VELOCITY_DISSIPATION = .92;
     } 
     else if(val === 'Fast'){
-        config.WACKY_FLAG = 7.0;
+        config.WACKY_DISSIPATION_FLAG = 7.0;
         multipleSplats(1);
     }
     else if (val === 'Slow'){
-        config.WACKY_FLAG = 8.0;
+        config.WACKY_DISSIPATION_FLAG = 8.0;
     }
     else if(val === 'None'){
-        config.WACKY_FLAG = 9.0;
+        config.WACKY_DISSIPATION_FLAG = 9.0;
     }
     else{
-        config.WACKY_FLAG = 0.0
+        config.WACKY_DISSIPATION_FLAG = 0.0
     }
+}
 
+// implementing wacky vorticity
+function wackyVorticity(){
+    let val = config.WACKY_DISSIPATION; 
+    if(val === 'High'){
+        config.WACKY_VORTICITY_FLAG = 1.1
+    }
+    else if(val === 'Low'){
 
+    }
+    else if(val === 'None'){
+
+    }
+    else{
+
+    }
 }
 
 function applyWacky(){
 
     // function for dissipation
-    wackyDissipation()
+    wackyDissipation();
+    wackyVorticity();
 }
 
 function splatPointer (pointer) {
