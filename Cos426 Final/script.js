@@ -42,29 +42,7 @@ const audio = new Audio();
 // https://medium.com/swlh/building-a-audio-visualizer-with-javascript-324b8d420e7
 function frequencyAnalyzer(){
 
-    const buffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 1, audioCtx.sampleRate);
-    const channelData = buffer.getChannelData(0);
 
-
-    audioCtx.decodeAudioData(ab, (buffer) => {
-        source = audioCtx.createBufferSource();
-        source.connect(analyser);
-        source.buffer = buffer;
-        source.start(0);
-        viewBufferData();
-
-    // create audio context
-
-})
-
-
-// function viewBufferData(){
-//     setInterval(function(){
-//         Frequency.data = new Uint8Array(analyser.frequencyBinCount);
-//         analyser.getByteFrequencyData(Frequency.data); //passing our Uint data array
-//         //xanalyser.getFloatFrequencyData(data);
-//         console.log(Frequency.data);
-//     }, 1000)
 }
 
 /*
@@ -1552,22 +1530,29 @@ MUSIC FUNCTIONS
 -----------------------------------------------------------------
 */
 function playMp3() { 
+    // play audio
     let audioContainer = document.getElementById("demo"); 
     audioContainer.play(); 
 
     Frequency = Frequency || {};
-
     audioCtx = new AudioContext();
 
     // pulling audio
     audio.src = document.getElementById("water").src;
-    console.log(audio.src)
     audio.load();
+
+    // creating source
     source = audioCtx.createMediaElementSource(audio);
 
     // create audio analyzer
     analyser = audioCtx.createAnalyser();
-    analyser.fftSize = 2048;
+    analyser.fftSize = 64;
+    Frequency.data = new Uint8Array(analyser.frequencyBinCount);
+    setInterval(function(){
+        analyser.getByteFrequencyData(Frequency.data);
+        console.log(Frequency.data);
+    })
+    
     
     // set up audio node connection
     source.connect(analyser);
@@ -1651,10 +1636,10 @@ function applyWacky(){
     wackyVorticity();
 }
 
-// HELPER FOR WACKY COLLISION EFFECT 
-// function mirror(coord) {
-//     return 0.5 - (coord - 0.5);
-// }
+// // HELPER FOR WACKY COLLISION EFFECT 
+function mirror(coord) {
+    return 0.5 - (coord - 0.5);
+}
 
 function splatPointer (pointer) {
     let dx = pointer.deltaX * config.SPLAT_FORCE;
@@ -1662,7 +1647,7 @@ function splatPointer (pointer) {
     // NOTES: texcoords are from 0 to 1, 
     // I think deltaX is the displacement of the cursor
     splat(pointer.texcoordX, pointer.texcoordY, dx, dy, pointer.color);
-    // splat(mirror(pointer.texcoordX), mirror(pointer.texcoordY), mirror(dx), mirror(dy), pointer.color);
+    splat(mirror(pointer.texcoordY), mirror(pointer.texcoordX), mirror(dy), mirror(dx), pointer.color);
 }
 
 function multipleSplats (amount) {
