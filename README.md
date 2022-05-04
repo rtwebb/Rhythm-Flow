@@ -6,7 +6,7 @@ This is our music fluid dynamics simulator that changes based on musical attribu
 
 **Instructions**
 <br>
-Use the gui on the right side to change the settings of the simulator. To see the simulation visualized either press "random splats" or drag your mouse across the screen.
+Use the gui on the right side to change the settings of the simulator. To see the simulation visualized either press "random splats" or drag your mouse across the screen. See the live demo at: https://rtwebb.github.io/Rhythm-Flow/.
 
 **REFERENCES**
 <br><br>
