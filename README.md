@@ -3,6 +3,10 @@
 This is our music fluid dynamics simulator that changes based on musical attributes (frequency, volume, tempo, etc.). This repository builds upon the fluid simulator developed by Pavel Dobryakov: https://github.com/PavelDoGreat/WebGL-Fluid-Simulation. 
 
 
+
+**Instructions**
+Use the gui on the right side to change the settings of the simulator. To see the simulation visualized either press "random splats" or drag your mouse across the screen.
+
 **REFERENCES**
 <br><br>
 Fluid References
@@ -10,7 +14,7 @@ Fluid References
 <ul>
   <li> GPU Gems, "Fast Fluid Dynamics Simulation on GPU": https://developer.nvidia.com/gpugems/gpugems/part-vi-beyond-triangles/chapter-38-fast-fluid-dynamics-simulation-gpu </li>
   <li> Jamie Wong's "Fluid Simulation": http://jamie-wong.com/2016/08/05/webgl-fluid-simulation/ </li>
-  <li> Base Fluid Simulator: https://github.com/PavelDoGreat/WebGL-Fluid-Simulation </li>
+  <li> Base Fluid Simulator: https://github.com/PavelDoGreat/WebGL-Fluid-Simulation (Our proect builds upon Pavel's implementation) </li>
 </ul>
 
 Music References
