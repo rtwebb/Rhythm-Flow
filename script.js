@@ -298,7 +298,7 @@ function startGUI () {
     wackyFolder.add(config, 'WACKY_DISSIPATION', ['Regular', 'Fast', 'Slow', 'None', 'Strobe', 'Marker'] ).name('dissipation');
     //wackyFolder.add(config, 'WACKY_VORTICITY', ['Regular', 'High', 'None']).name('vorticity');
     wackyFolder.add(config, 'WACKY_CURL', ['Regular', 'Tight', 'Loose']).name('curl');
-    wackyFolder.add(config, 'WACKY_MOTION', ['Regular', 'Opposite', 'Collision']).name('motion');
+    wackyFolder.add(config, 'WACKY_MOTION', ['Regular', 'Opposite', 'Parallel', 'Collision']).name('motion');
     wackyFolder.add(config, 'WACKY_MIRRORADVECT').name('mirror advect').onFinishChange(updateKeywords);
 
     // enables person to take a screenshot - could delete
@@ -1681,6 +1681,9 @@ function wackyMotion(){
     else if(config.WACKY_MOTION === 'Collision'){
         config.WACKY_MOTION_FLAG = 2.0;
     }
+    else if(config.WACKY_MOTION === 'Parallel'){
+        config.WACKY_MOTION_FLAG = 3.0
+    }
     else{
         config.WACKY_MOTION_FLAG = 0.0;
     }
@@ -1704,11 +1707,22 @@ function splatPointer (pointer) {
     // NOTES: texcoords are from 0 to 1,
     // I think deltaX is the displacement of the cursor
     splat(pointer.texcoordX, pointer.texcoordY, dx, dy, pointer.color);
+
     if (config.WACKY_MOTION_FLAG === 1.0){
         splat(mirror(pointer.texcoordX), mirror(pointer.texcoordY), mirror(dx), mirror(dy), pointer.color);
     }
     else if(config.WACKY_MOTION_FLAG === 2.0){
         splat(mirror(pointer.texcoordY), mirror(pointer.texcoordX), mirror(dy), mirror(dx), pointer.color);
+    }
+    else if(config.WACKY_MOTION_FLAG === 3.0){
+        // x-direction
+        if (dy === 0.0)
+            splat(pointer.texcoordX, mirror(pointer.texcoordY), dx, mirror(dy), pointer.color);
+        // y-direction
+        else if(dx === 0.0)
+            splat(mirror(pointer.texcoordX), pointer.texcoordY, mirror(dx), dy, pointer.color);
+        else
+            splat(mirror(pointer.texcoordX), mirror(pointer.texcoordY), dx, dy, pointer.color);
     }
 
 
