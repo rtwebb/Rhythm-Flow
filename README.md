@@ -1,7 +1,12 @@
 **"Rhythm-Flow"**
 
-This is our music fluid dynamics simulator that changes based on musical attributes (frequency, volume, tempo, etc.). This repository builds upon the fluid simulator developed by Pavel Dobryakov: https://github.com/PavelDoGreat/WebGL-Fluid-Simulation. 
+This is our music fluid dynamics simulator that changes based on musical attributes (i.e., BPM). This repository builds upon the fluid simulator developed by Pavel Dobryakov: https://github.com/PavelDoGreat/WebGL-Fluid-Simulation. 
 
+
+
+**Instructions**
+<br>
+Use the gui on the right side to change the settings of the simulator. To see the simulation visualized either press "random splats" or drag your mouse across the screen. See the live demo at: https://rtwebb.github.io/Rhythm-Flow/.
 
 **REFERENCES**
 <br><br>
