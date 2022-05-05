@@ -24,4 +24,5 @@ Music References
   <li> https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API/Advanced_techniques</li>
   <li> Playing Audio: https://stackoverflow.com/questions/53987982/why-does-audio-not-play-in-javascript  </li>
   <li> Frequency Analysis: https://medium.com/swlh/building-a-audio-visualizer-with-javascript-324b8d420e7</li>
+  <li> Tempo detection: https://www.npmjs.com/package/web-audio-beat-detector </li>
 </ul>
