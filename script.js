@@ -50,7 +50,7 @@ FREQUENCY ANALYSIS
 //     });
 
 
-// https://medium.com/swlh/building-a-audio-visualizer-with-javascript-324b8d420e7
+// // https://medium.com/swlh/building-a-audio-visualizer-with-javascript-324b8d420e7
 // function frequencyAnalyzer(){
 
 //     Frequency.data = new Uint8Array(analyser.frequencyBinCount);
@@ -1739,6 +1739,23 @@ function multipleSplats (amount) {
         const dx = 1000 * (Math.random() - 0.5);
         const dy = 1000 * (Math.random() - 0.5);
         splat(x, y, dx, dy, color);
+
+        if (config.WACKY_MOTION_FLAG === 1.0){
+            splat(mirror(x), mirror(y), mirror(dx), mirror(dy), color);
+        }
+        else if(config.WACKY_MOTION_FLAG === 2.0){
+            splat(mirror(y), mirror(x), mirror(dy), mirror(dx), color);
+        }
+        else if(config.WACKY_MOTION_FLAG === 3.0){
+            // x-direction
+            if (dy === 0.0)
+                splat(x, mirror(y), dx, mirror(dy), color);
+            // y-direction
+            else if(dx === 0.0)
+                splat(mirror(x), y, mirror(dx), dy, color);
+            else
+                splat(mirror(x), mirror(y), dx, dy, color);
+        }
     }
 }
 
